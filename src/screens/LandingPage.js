@@ -5,30 +5,45 @@ import {
   SafeAreaView,
   StyleSheet,
   Dimensions,
+  ImageBackground,
 } from 'react-native';
 import axios from 'axios';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {AuthContext} from '../../context';
-import {storeData, alertMessage} from '../utils';
+import {storeData, alertMessage, normalize} from '../utils';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 30,
+    padding: normalize(30),
+  },
+  backgroundImg: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    justifyContent: 'center',
+  },
+  contentWrapper: {
+    backgroundColor: theme.colors.white_70,
+    marginHorizontal: normalize(20),
+    padding: normalize(20),
+    borderRadius: 20,
+    justifyContent: 'center',
   },
   txtTitle: {
-    margin: 20,
-    color: theme.colors.red,
+    fontSize: normalize(20),
+    alignSelf: 'center',
   },
   inputContainer: {
     alignItems: 'center',
   },
   inputStyle: {
-    width: SCREEN_WIDTH * 0.9,
+    width: '90%',
+    height: normalize(30),
     borderRadius: 10,
     backgroundColor: theme.colors.white,
     fontSize: 18,
@@ -38,11 +53,12 @@ const styles = StyleSheet.create({
   },
   loginTxt: {
     color: theme.colors.white,
-    fontSize: 18,
+    fontSize: normalize(16),
+    fontWeight: 'bold',
   },
   loginWrapper: {
     backgroundColor: theme.colors.red,
-    width: SCREEN_WIDTH * 0.6,
+    width: '40%',
     borderRadius: 10,
     paddingVertical: 12,
     marginVertical: 10,
@@ -71,8 +87,7 @@ function LandingPage() {
   async function login() {
     try {
       const response = await axios.get(
-        // 'https://food-planet.herokuapp.com/users/login',
-        'http://172.18.0.1:8080/users/login',
+        'https://food-planet.herokuapp.com/users/login',
         {
           params: {
             role: 'tenant',
@@ -103,32 +118,38 @@ function LandingPage() {
   }
   return (
     <SafeAreaView style={styles.container}>
-      <Title text="Tenant Login" />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.inputStyle}
-          onChangeText={(text) => onChangeEmail(text)}
-          value={email}
-          textContentType="emailAddress"
-          autoCapitalize="none"
-          placeholder="Email"
-        />
-        <TextInput
-          style={styles.inputStyle}
-          onChangeText={(text) => onChangePassword(text)}
-          value={password}
-          textContentType="password"
-          autoCapitalize="none"
-          placeholder="Password"
-          secureTextEntry={true}
-        />
-        <ButtonText
-          title="Log in"
-          txtStyle={styles.loginTxt}
-          wrapperStyle={styles.loginWrapper}
-          onPress={() => validationLogin}
-        />
-      </View>
+      <ImageBackground
+        style={styles.backgroundImg}
+        source={require('../assets/landing-page.jpg')}>
+        <View style={styles.contentWrapper}>
+          <Title txtStyle={styles.txtTitle} text="Login to your account" />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.inputStyle}
+              onChangeText={(text) => onChangeEmail(text)}
+              value={email}
+              textContentType="emailAddress"
+              autoCapitalize="none"
+              placeholder="Tenant Email"
+            />
+            <TextInput
+              style={styles.inputStyle}
+              onChangeText={(text) => onChangePassword(text)}
+              value={password}
+              textContentType="password"
+              autoCapitalize="none"
+              placeholder="Password"
+              secureTextEntry={true}
+            />
+            <ButtonText
+              title="LOGIN"
+              txtStyle={styles.loginTxt}
+              wrapperStyle={styles.loginWrapper}
+              onPress={() => validationLogin}
+            />
+          </View>
+        </View>
+      </ImageBackground>
     </SafeAreaView>
   );
 }

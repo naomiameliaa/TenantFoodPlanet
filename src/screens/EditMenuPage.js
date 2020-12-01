@@ -40,6 +40,9 @@ const styles = StyleSheet.create({
     height: '50%',
     margin: 10,
     borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: normalize(20),
   },
   inputStyle: {
     width: SCREEN_WIDTH * 0.9,
@@ -72,11 +75,6 @@ const styles = StyleSheet.create({
     height: 200,
     borderColor: 'black',
     borderWidth: 1,
-  },
-  btnWrapper: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: normalize(20),
   },
   btnSave: {
     backgroundColor: theme.colors.red,
