@@ -23,79 +23,82 @@ const {width: SCREEN_WIDTH} = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+  },
+  innerContainer: {
+    padding: normalize(10),
   },
   titleText: {
-    fontSize: normalize(25),
-    margin: 10,
+    fontSize: normalize(22),
+    marginTop: 15,
+    marginBottom: 25,
+    textAlign: 'center',
   },
-  btnText: {
-    color: theme.colors.white,
-    fontWeight: 'bold',
-    fontSize: normalize(16),
-  },
-  btnWrapper: {
-    backgroundColor: theme.colors.red,
-    width: '30%',
-    height: '50%',
-    margin: 10,
-    borderRadius: 5,
+  contentContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: normalize(20),
+    top: -normalize(20),
   },
   inputStyle: {
-    width: SCREEN_WIDTH * 0.9,
+    width: '100%',
+    height: 40,
     borderRadius: 10,
     backgroundColor: theme.colors.white,
     fontSize: 18,
     paddingHorizontal: 20,
-    marginVertical: 10,
+    marginVertical: 8,
     justifyContent: 'center',
   },
   textArea: {
-    width: SCREEN_WIDTH * 0.9,
+    width: '100%',
+    height: 120,
     borderRadius: 10,
     backgroundColor: theme.colors.white,
     fontSize: 18,
     paddingHorizontal: 20,
-    marginVertical: 10,
-    textAlignVertical: 'top',
-    height: 120,
+    marginVertical: 8,
   },
   imageSections: {
-    display: 'flex',
-    flexDirection: 'row',
     paddingHorizontal: 8,
     paddingVertical: 8,
     justifyContent: 'center',
   },
+  btnImage: {
+    alignSelf: 'flex-end',
+    zIndex: 1,
+    top: -normalize(40),
+    marginHorizontal: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.colors.white,
+    padding: 5,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    opacity: 0.6,
+  },
   images: {
     width: '100%',
-    height: 200,
+    height: 220,
     borderColor: 'black',
-    borderWidth: 1,
+    borderWidth: 0.5,
+    borderRadius: 20,
   },
-  btnSave: {
-    backgroundColor: theme.colors.red,
-    width: SCREEN_WIDTH * 0.6,
-    borderRadius: 10,
-    paddingVertical: 12,
-    marginVertical: 5,
-  },
-  txtSave: {
+  btnText: {
     color: theme.colors.white,
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: 'bold',
+  },
+  btnWrapper: {
+    backgroundColor: theme.colors.red,
+    width: '50%',
+    borderRadius: 10,
+    paddingVertical: 8,
+    marginVertical: 5,
+    alignSelf: 'center',
   },
 });
 
 function EditMenu({navigation, route}) {
-  const [menu_name, onChangeMenuName] = React.useState('');
-  const [menu_description, onChangeMenuDescription] = React.useState('');
-  const [menu_price, onChangeMenuPrice] = React.useState('');
-  const [fileData, setFileData] = React.useState('');
-  const [filePath, setFilePath] = React.useState('');
   const {
     menuId,
     menuName,
@@ -103,15 +106,19 @@ function EditMenu({navigation, route}) {
     menuPrice,
     menuImage,
   } = route.params;
-
+  const [menu_name, onChangeMenuName] = React.useState(menuName);
+  const [menu_description, onChangeMenuDescription] = React.useState(
+    menuDescription,
+  );
+  const [menu_price, onChangeMenuPrice] = React.useState(menuPrice);
+  const [fileData, setFileData] = React.useState(menuImage);
   const [errorMessage, setErrorMessage] = React.useState('');
   const [isLoading] = React.useState(false);
 
   async function editMenu() {
     try {
       const response = await axios.put(
-        // 'https://food-planet.herokuapp.com/tenants/generate',
-        'http://172.18.0.1:8080/menu/update',
+        'https://food-planet.herokuapp.com/menu/update',
         {
           menuId: menuId,
           name: menu_name,
@@ -168,7 +175,6 @@ function EditMenu({navigation, route}) {
         console.log('User tapped custom button: ', response.customButton);
       } else {
         const source = {uri: 'data:image/jpeg;base64,' + response.data};
-        setFilePath(response);
         setFileData(response.data);
         console.log('THIS IS FILEDATA', response.data);
       }
@@ -178,18 +184,18 @@ function EditMenu({navigation, route}) {
   function renderFileData() {
     if (fileData) {
       return (
-        <ButtonKit
+        <Image
           source={{uri: 'data:image/jpeg;base64,' + fileData}}
-          wrapperStyle={styles.images}
-          onPress={chooseImage}
+          style={styles.images}
+          resizeMode="contain"
         />
       );
     } else {
       return (
-        <ButtonKit
+        <Image
           source={{uri: 'data:image/jpeg;base64,' + menuImage}}
-          wrapperStyle={styles.images}
-          onPress={chooseImage}
+          style={styles.images}
+          resizeMode="contain"
         />
       );
     }
@@ -200,47 +206,47 @@ function EditMenu({navigation, route}) {
       {isLoading ? (
         <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.headerContainer}>
-            <Title text="Edit Menu" />
-          </View>
-          <View style={styles.contentContainer}>
+        <View style={styles.innerContainer}>
+          <Title text="Edit Menu" txtStyle={styles.titleText} />
+          <ScrollView showsVerticalScrollIndicator={false}>
             <View style={styles.ImageSections}>{renderFileData()}</View>
-            <TextInput
-              style={styles.inputStyle}
-              onChangeText={(text) => onChangeMenuName(text)}
-              value={menu_name}
-              autoCapitalize="none"
-              placeholder={menuName}
+            <ButtonKit
+              source={require('../assets/photo.png')}
+              wrapperStyle={styles.btnImage}
+              onPress={chooseImage}
             />
-            <TextInput
-              style={styles.textArea}
-              onChangeText={(text) => onChangeMenuDescription(text)}
-              value={
-                menu_description.length <= 0
-                  ? menuDescription
-                  : menu_description
-              }
-              autoCapitalize="none"
-              placeholder={menuDescription}
-            />
-            <TextInput
-              style={styles.inputStyle}
-              onChangeText={(text) => onChangeMenuPrice(text)}
-              value={menu_price}
-              autoCapitalize="none"
-              placeholder={menuPrice.toString()}
-            />
-          </View>
-          <View style={styles.btnWrapper}>
+            <View style={styles.contentContainer}>
+              <TextInput
+                style={styles.inputStyle}
+                onChangeText={(text) => onChangeMenuName(text)}
+                value={menu_name}
+                autoCapitalize="none"
+                placeholder="Menu Name"
+              />
+              <TextInput
+                style={styles.textArea}
+                onChangeText={(text) => onChangeMenuDescription(text)}
+                value={menu_description}
+                autoCapitalize="none"
+                placeholder="Menu Description"
+              />
+              <TextInput
+                style={styles.inputStyle}
+                onChangeText={(text) => onChangeMenuPrice(text)}
+                value={menu_price.toString()}
+                autoCapitalize="none"
+                placeholder="Menu Price"
+              />
+            </View>
             <ButtonText
               title="Save"
-              txtStyle={styles.txtSave}
-              wrapperStyle={styles.btnSave}
+              txtStyle={styles.btnText}
+              wrapperStyle={styles.btnWrapper}
               onPress={editMenu}
+              isLoading
             />
-          </View>
-        </ScrollView>
+          </ScrollView>
+        </View>
       )}
     </SafeAreaView>
   );

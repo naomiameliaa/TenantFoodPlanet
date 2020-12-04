@@ -19,7 +19,6 @@ const {width: SCREEN_WIDTH} = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: normalize(30),
   },
   backgroundImg: {
     width: '100%',
@@ -28,7 +27,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   contentWrapper: {
-    backgroundColor: theme.colors.white_70,
+    backgroundColor: theme.colors.white_60,
     marginHorizontal: normalize(20),
     padding: normalize(20),
     borderRadius: 20,
@@ -43,13 +42,22 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     width: '90%',
-    height: normalize(30),
-    borderRadius: 10,
+    height: normalize(40),
+    borderRadius: 20,
     backgroundColor: theme.colors.white,
     fontSize: 18,
     paddingHorizontal: 20,
     marginVertical: 10,
     justifyContent: 'center',
+  },
+  forgotPassword: {
+    color: theme.colors.red,
+    fontWeight: 'bold',
+  },
+  wrapperForgotPass: {
+    marginBottom: 10,
+    alignSelf: 'flex-start',
+    marginHorizontal: 20,
   },
   loginTxt: {
     color: theme.colors.white,
@@ -59,13 +67,13 @@ const styles = StyleSheet.create({
   loginWrapper: {
     backgroundColor: theme.colors.red,
     width: '40%',
-    borderRadius: 10,
+    borderRadius: 20,
     paddingVertical: 12,
     marginVertical: 10,
   },
 });
 
-function LandingPage() {
+function LandingPage({navigation}) {
   const {signIn} = React.useContext(AuthContext);
   const [email, onChangeEmail] = React.useState('');
   const [password, onChangePassword] = React.useState('');
@@ -142,10 +150,16 @@ function LandingPage() {
               secureTextEntry={true}
             />
             <ButtonText
+              title="Forgot Password?"
+              txtStyle={styles.forgotPassword}
+              wrapperStyle={styles.wrapperForgotPass}
+              onPress={() => navigation.navigate('ForgotPasswordPage')}
+            />
+            <ButtonText
               title="LOGIN"
               txtStyle={styles.loginTxt}
               wrapperStyle={styles.loginWrapper}
-              onPress={() => validationLogin}
+              onPress={validationLogin}
             />
           </View>
         </View>

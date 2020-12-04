@@ -13,6 +13,7 @@ import ChangePassword from './src/screens/ChangePasswordPage';
 import AddMenu from './src/screens/AddMenuPage';
 import EditMenu from './src/screens/EditMenuPage';
 import MenuDetail from './src/screens/MenuDetailPage';
+import ForgotPassword from './src/screens/ForgotPassword';
 
 const AuthStack = createStackNavigator();
 const AuthStackScreen = () => (
@@ -20,6 +21,11 @@ const AuthStackScreen = () => (
     <AuthStack.Screen
       name="LandingPage"
       component={LandingPage}
+      options={{headerShown: false}}
+    />
+    <AuthStack.Screen
+      name="ForgotPasswordPage"
+      component={ForgotPassword}
       options={{headerShown: false}}
     />
   </AuthStack.Navigator>
@@ -93,8 +99,11 @@ const RootStackScreen = ({tenantAdminData}) => (
 );
 
 function App() {
-  const getDataTenantAdmin = async (key) => {
-    const dataTenantAdmin = await getData(key);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [tenantAdminData, setTenantAdminData] = React.useState(null);
+
+  const getDataTenantAdmin = async () => {
+    const dataTenantAdmin = await getData('tenantAdminData');
     if (dataTenantAdmin !== null) {
       setTenantAdminData(dataTenantAdmin);
     } else {
@@ -102,18 +111,15 @@ function App() {
     }
   };
 
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [tenantAdminData, setTenantAdminData] = React.useState(null);
-
   React.useEffect(() => {
-    getDataTenantAdmin('tenantAdminData');
+    getDataTenantAdmin();
   }, []);
 
   const authContext = React.useMemo(() => {
     return {
       signIn: () => {
         setIsLoading(false);
-        setTenantAdminData(getDataTenantAdmin('tenantAdminData'));
+        setTenantAdminData(getDataTenantAdmin());
       },
       signUp: () => {
         setIsLoading(false);

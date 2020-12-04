@@ -20,11 +20,22 @@ const {width: SCREEN_WIDTH} = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+  },
+  innerContainer: {
+    padding: normalize(10),
+    marginVertical: 10,
+    justifyContent: 'center',
     alignItems: 'center',
   },
+  titleText: {
+    fontSize: normalize(22),
+    marginTop: 15,
+    marginBottom: 25,
+    textAlign: 'center',
+  },
   txtInput: {
-    width: SCREEN_WIDTH * 0.9,
+    width: '90%',
+    height: 40,
     borderRadius: 10,
     backgroundColor: theme.colors.white,
     fontSize: 18,
@@ -32,24 +43,24 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     justifyContent: 'center',
   },
-  btnSave: {
-    backgroundColor: theme.colors.red,
-    width: SCREEN_WIDTH * 0.6,
-    borderRadius: 10,
-    paddingVertical: 12,
-    marginVertical: 5,
-  },
-  txtSave: {
+  btnText: {
     color: theme.colors.white,
-    fontSize: 18,
+    fontSize: normalize(18),
     fontWeight: 'bold',
+  },
+  btnWrapper: {
+    backgroundColor: theme.colors.red,
+    width: '50%',
+    borderRadius: 10,
+    paddingVertical: 8,
+    marginVertical: 5,
+    alignSelf: 'center',
   },
 });
 
 function ChangePassword({navigation}) {
   const [password, onChangePassword] = React.useState('');
   const [confirmPassword, onChangeConfirmPassword] = React.useState('');
-
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
@@ -94,33 +105,35 @@ function ChangePassword({navigation}) {
   }
 
   return (
-    <View style={styles.container}>
-      <Title text="Change Password" />
-      <TextInput
-        style={styles.txtInput}
-        onChangeText={(text) => onChangePassword(text)}
-        value={password}
-        textContentType="password"
-        secureTextEntry={true}
-        autoCapitalize="none"
-        placeholder="New Password"
-      />
-      <TextInput
-        style={styles.txtInput}
-        onChangeText={(text) => onChangeConfirmPassword(text)}
-        value={confirmPassword}
-        textContentType="password"
-        secureTextEntry={true}
-        autoCapitalize="none"
-        placeholder="Confirm Password"
-      />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.innerContainer}>
+        <Title text="Change Password" txtStyle={styles.titleText} />
+        <TextInput
+          style={styles.txtInput}
+          onChangeText={(text) => onChangePassword(text)}
+          value={password}
+          textContentType="password"
+          secureTextEntry={true}
+          autoCapitalize="none"
+          placeholder="New Password"
+        />
+        <TextInput
+          style={styles.txtInput}
+          onChangeText={(text) => onChangeConfirmPassword(text)}
+          value={confirmPassword}
+          textContentType="password"
+          secureTextEntry={true}
+          autoCapitalize="none"
+          placeholder="Confirm Password"
+        />
+      </View>
       <ButtonText
         title="Save"
-        txtStyle={styles.txtSave}
-        wrapperStyle={styles.btnSave}
+        txtStyle={styles.btnText}
+        wrapperStyle={styles.btnWrapper}
         onPress={changePassword}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 

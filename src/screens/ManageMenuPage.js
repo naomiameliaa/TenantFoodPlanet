@@ -22,7 +22,9 @@ const {width: SCREEN_WIDTH} = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+  },
+  innerContainer: {
+    padding: normalize(10),
   },
   headerContainer: {
     flexDirection: 'row',
@@ -42,13 +44,14 @@ const styles = StyleSheet.create({
   btnText: {
     color: theme.colors.white,
     fontWeight: 'bold',
-    fontSize: normalize(16),
+    fontSize: normalize(15),
   },
   btnWrapper: {
     backgroundColor: theme.colors.red,
     padding: normalize(10),
-    height: normalize(35),
     borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   imgMenuStyle: {
     width: '100%',
@@ -57,14 +60,16 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
   },
+  menuNameWrapper: {
+    backgroundColor: theme.colors.red,
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+  },
   menuName: {
     textAlign: 'center',
     fontWeight: 'bold',
     fontSize: normalize(14),
     paddingVertical: 5,
-    backgroundColor: theme.colors.red,
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
     color: theme.colors.white,
   },
   menuWrapper: {
@@ -89,10 +94,6 @@ function ManageMenu({navigation}) {
   const [menuData, setMenuData] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
 
-  React.useEffect(() => {
-    getMenuData();
-  }, []);
-
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
     if (getDataTenantAdmin !== null) {
@@ -106,15 +107,18 @@ function ManageMenu({navigation}) {
     setIsLoading(true);
     const tenantId = await getDataTenantAdmin();
     try {
-      const response = await axios.get('http://172.18.0.1:8080/menu/tenant', {
-        params: {
-          tenantId: tenantId,
+      const response = await axios.get(
+        'https://food-planet.herokuapp.com/menu/tenant',
+        {
+          params: {
+            tenantId: tenantId,
+          },
+          auth: {
+            username: 'tenantAdmin@mail.com',
+            password: 'password',
+          },
         },
-        auth: {
-          username: 'tenantAdmin@mail.com',
-          password: 'password',
-        },
-      });
+      );
       if (response.data.msg === 'Query success') {
         setMenuData(response.data.object);
         console.log('MENU DATA: ', response.data.object);
@@ -128,17 +132,30 @@ function ManageMenu({navigation}) {
   async function deleteMenu(menuId) {
     try {
       const response = await axios.delete(
-        'http://172.18.0.1:8080/menu/delete',
+        'https://food-planet.herokuapp.com/menu/delete',
         {
           params: {
             menuId: menuId,
           },
         },
       );
+      console.log('data yang diapus', response.data);
       if (response.status === 200) {
         getMenuData();
+        alertMessage({
+          titleMessage: 'Success!',
+          bodyMessage: 'Succeed delete menu.',
+          btnText: 'OK',
+          btnCancel: true,
+        });
       }
     } catch (error) {
+      alertMessage({
+        titleMessage: 'Failed!',
+        bodyMessage: 'Failed delete menu, Please try again later.',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
       console.log(error);
     }
   }
@@ -163,7 +180,9 @@ function ManageMenu({navigation}) {
             style={styles.imgMenuStyle}
             source={{uri: `data:image/jpeg;base64,${item.image}`}}
           />
-          <Text style={styles.menuName}>{item.name}</Text>
+          <View style={styles.menuNameWrapper}>
+            <Text style={styles.menuName}>{item.name}</Text>
+          </View>
         </View>
         <View style={styles.btnContainer}>
           <ButtonKit
@@ -201,31 +220,38 @@ function ManageMenu({navigation}) {
     );
   };
 
+  React.useEffect(() => {
+    getMenuData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Title txtStyle={styles.titleText} text="My Menu" />
-        <ButtonText
-          title="Add Menu"
-          txtStyle={styles.btnText}
-          wrapperStyle={styles.btnWrapper}
-          onPress={() => {
-            navigation.navigate('Add Menu');
-          }}
-        />
-      </View>
-      <ScrollView>
-        {isLoading ? (
-          <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
-        ) : (
-          <FlatList
-            data={menuData}
-            renderItem={({item, index}) => renderItem({item, index})}
-            keyExtractor={(item) => item.menuId.toString()}
-            numColumns={2}
+      <View style={styles.innerContainer}>
+        <View style={styles.headerContainer}>
+          <Title txtStyle={styles.titleText} text="My Menu" />
+          <ButtonText
+            title="Add Menu"
+            txtStyle={styles.btnText}
+            wrapperStyle={styles.btnWrapper}
+            onPress={() => {
+              navigation.navigate('Add Menu');
+            }}
           />
-        )}
-      </ScrollView>
+        </View>
+        <ScrollView>
+          {isLoading ? (
+            <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
+          ) : (
+            <FlatList
+              data={menuData}
+              renderItem={({item, index}) => renderItem({item, index})}
+              keyExtractor={(item) => item.menuId.toString()}
+              numColumns={2}
+            />
+          )}
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
