@@ -11,11 +11,10 @@ import {
   Dimensions,
 } from 'react-native';
 import axios from 'axios';
-import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, removeData, alertMessage} from '../utils';
+import {normalize, getData, alertMessage} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -112,6 +111,8 @@ const styles = StyleSheet.create({
 function OngoingOrder({navigation}) {
   const [orderData, setOrderData] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoadingPickedUp, setIsLoadingPickedUp] = React.useState(false);
+  const [isLoadingReady, setIsLoadingReady] = React.useState(false);
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
@@ -119,29 +120,6 @@ function OngoingOrder({navigation}) {
       return dataTenantAdmin.tenantId;
     } else {
       return null;
-    }
-  };
-
-  const renderStatus = (status) => {
-    if (status === 'PROCESSING') {
-      return 'Status: Processing your order';
-    } else {
-      return 'Status: Your order is ready';
-    }
-  };
-
-  const renderDate = (dateTime) => {
-    let i = 0;
-    let dates = '';
-    let spaces = 0;
-    for (; i < dateTime.length; i++) {
-      dates += dateTime[i];
-      if (dateTime[i] === ' ') {
-        spaces++;
-        if (spaces === 2) {
-          return dates;
-        }
-      }
     }
   };
 
@@ -169,26 +147,41 @@ function OngoingOrder({navigation}) {
 
   const renderItem = ({item, idx}) => {
     return (
-      <TouchableOpacity style={styles.orderContainer} key={idx}>
+      <TouchableOpacity
+        style={styles.orderContainer}
+        key={idx}
+        onPress={() =>
+          navigation.navigate('Order Detail', {
+            orderNum: item.orderNum,
+            transactionDate: item.date,
+            status: item.status,
+            totalPrice: item.totalPrice,
+            dataOrder: item.detail,
+          })
+        }>
         <View style={styles.orderNumBtnWrapper}>
           <Text style={styles.orderNum}>Order No. {item.orderNum}</Text>
           <ButtonText
             title="Notify Customer"
             wrapperStyle={styles.notifyBtn}
             txtStyle={styles.btnText}
+            onPress={() => setStatusReady(item.orderId)}
+            isLoadingReady
           />
         </View>
         {item.detail.map((itm, key) => {
           return (
-            <View style={styles.detailWrapper}>
+            <View style={styles.detailWrapper} key={key}>
               <View style={styles.horizontalWrapper}>
                 <Text style={styles.quantity}>{`${itm.quantity}x`}</Text>
                 <Text style={styles.txtStyle}>{itm.menuName}</Text>
               </View>
-              <View style={styles.notesWrapper}>
-                <Text style={styles.txtStyle}>Notes: </Text>
-                <Text style={styles.notes}>{itm.notes}</Text>
-              </View>
+              {itm.notes !== 'null' && (
+                <View style={styles.notesWrapper}>
+                  <Text style={styles.txtStyle}>Notes: </Text>
+                  <Text style={styles.notes}>{itm.notes}</Text>
+                </View>
+              )}
             </View>
           );
         })}
@@ -196,6 +189,8 @@ function OngoingOrder({navigation}) {
           title="Picked up"
           wrapperStyle={styles.pickedUpBtn}
           txtStyle={styles.btnText}
+          onPress={() => setStatusPickedUp(item.orderId)}
+          isLoadingPickedUp
         />
       </TouchableOpacity>
     );
@@ -214,14 +209,80 @@ function OngoingOrder({navigation}) {
           },
         },
       );
+      console.log(response.data, 'ini response');
       if (response.data.msg === 'Query success') {
-        console.log('OrderData: ', response.data.object);
         setOrderData(response.data.object);
       }
     } catch (error) {
       console.log(error);
     }
     setIsLoading(false);
+  }
+
+  async function setStatusReady(orderId) {
+    setIsLoadingReady(true);
+    const tenantId = await getDataTenantAdmin();
+    try {
+      const response = await axios.post(
+        `https://food-planet.herokuapp.com/orders/setFoodReady?orderId=${orderId}&tenantId=${tenantId}`,
+        {
+          auth: {
+            username: 'tenantAdmin@mail.com',
+            password: 'password',
+          },
+        },
+      );
+      if (response.data.msg === 'Query success') {
+        alertMessage({
+          titleMessage: 'Success',
+          bodyMessage: 'Success Notify Customer',
+          btnText: 'OK',
+          btnCancel: true,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      alertMessage({
+        titleMessage: 'Failed',
+        bodyMessage: 'Please try again later!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    }
+    setIsLoadingReady(false);
+  }
+
+  async function setStatusPickedUp(orderId) {
+    setIsLoadingPickedUp(true);
+    const tenantId = await getDataTenantAdmin();
+    try {
+      const response = await axios.post(
+        `https://food-planet.herokuapp.com/orders/setOrderPickedUp?orderId=${orderId}&tenantId=${tenantId}`,
+        {
+          auth: {
+            username: 'tenantAdmin@mail.com',
+            password: 'password',
+          },
+        },
+      );
+      if (response.data.msg === 'Query success') {
+        alertMessage({
+          titleMessage: 'Success',
+          bodyMessage: 'Order Finished',
+          btnText: 'OK',
+          btnCancel: true,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      alertMessage({
+        titleMessage: 'Failed',
+        bodyMessage: 'Please try again later!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    }
+    setIsLoadingPickedUp(false);
   }
 
   React.useEffect(() => {
@@ -233,29 +294,31 @@ function OngoingOrder({navigation}) {
     <SafeAreaView style={styles.container}>
       <View style={styles.innerContainer}>
         <Title text="Ongoing Order" txtStyle={styles.titleText} />
-        {orderData.length === 0 ? (
-          <View style={styles.emptyOrderContainer}>
-            <Image
-              source={require('../assets/dinner.png')}
-              style={styles.emptyOrderStyle}
-            />
-            <Text style={styles.titleEmptyOrder}>
-              There is No Ongoing Order
-            </Text>
-          </View>
-        ) : (
-          <ScrollView style={styles.contentContainer}>
-            {isLoading ? (
-              <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
-            ) : (
-              <FlatList
-                data={orderData}
-                renderItem={({item, idx}) => renderItem({item, idx})}
-                keyExtractor={(item) => item.orderId.toString()}
-              />
-            )}
-          </ScrollView>
-        )}
+        <ScrollView style={styles.contentContainer}>
+          {isLoading ? (
+            <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
+          ) : (
+            <View>
+              {orderData.length === 0 ? (
+                <View style={styles.emptyOrderContainer}>
+                  <Image
+                    source={require('../assets/dinner.png')}
+                    style={styles.emptyOrderStyle}
+                  />
+                  <Text style={styles.titleEmptyOrder}>
+                    There is No Ongoing Order
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={orderData}
+                  renderItem={({item, idx}) => renderItem({item, idx})}
+                  keyExtractor={(item) => item.orderId.toString()}
+                />
+              )}
+            </View>
+          )}
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

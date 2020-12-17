@@ -1,12 +1,10 @@
 import * as React from 'react';
 import {
   View,
-  Text,
   Image,
   TextInput,
   SafeAreaView,
   StyleSheet,
-  Dimensions,
   ScrollView,
 } from 'react-native';
 import axios from 'axios';
@@ -14,11 +12,8 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage} from '../utils';
-import SpinnerKit from '../components/SpinnerKit';
+import {normalize, alertMessage} from '../utils';
 import ImagePicker from 'react-native-image-picker';
-
-const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -56,11 +51,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     paddingHorizontal: 20,
     marginVertical: 8,
-  },
-  imageSections: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    justifyContent: 'center',
+    textAlignVertical: 'top',
   },
   btnImage: {
     alignSelf: 'flex-end',
@@ -112,10 +103,10 @@ function EditMenu({navigation, route}) {
   );
   const [menu_price, onChangeMenuPrice] = React.useState(menuPrice);
   const [fileData, setFileData] = React.useState(menuImage);
-  const [errorMessage, setErrorMessage] = React.useState('');
-  const [isLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   async function editMenu() {
+    setIsLoading(true);
     try {
       const response = await axios.put(
         'https://food-planet.herokuapp.com/menu/update',
@@ -137,8 +128,6 @@ function EditMenu({navigation, route}) {
         });
       }
     } catch (error) {
-      setErrorMessage('Something went wrong');
-      console.log(error);
       alertMessage({
         titleMessage: 'Error',
         bodyMessage: 'Update menu failed',
@@ -146,6 +135,7 @@ function EditMenu({navigation, route}) {
         btnCancel: false,
       });
     }
+    setIsLoading(false);
   }
 
   function chooseImage() {
@@ -165,8 +155,6 @@ function EditMenu({navigation, route}) {
      * The second arg is the callback which sends object: response (more info in the API Reference)
      */
     ImagePicker.showImagePicker(options, (response) => {
-      console.log('Response = ', response);
-
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -174,9 +162,7 @@ function EditMenu({navigation, route}) {
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
       } else {
-        const source = {uri: 'data:image/jpeg;base64,' + response.data};
         setFileData(response.data);
-        console.log('THIS IS FILEDATA', response.data);
       }
     });
   }
@@ -203,51 +189,47 @@ function EditMenu({navigation, route}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {isLoading ? (
-        <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
-      ) : (
-        <View style={styles.innerContainer}>
-          <Title text="Edit Menu" txtStyle={styles.titleText} />
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.ImageSections}>{renderFileData()}</View>
-            <ButtonKit
-              source={require('../assets/photo.png')}
-              wrapperStyle={styles.btnImage}
-              onPress={chooseImage}
+      <View style={styles.innerContainer}>
+        <Title text="Edit Menu" txtStyle={styles.titleText} />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {renderFileData()}
+          <ButtonKit
+            source={require('../assets/photo.png')}
+            wrapperStyle={styles.btnImage}
+            onPress={chooseImage}
+          />
+          <View style={styles.contentContainer}>
+            <TextInput
+              style={styles.inputStyle}
+              onChangeText={(text) => onChangeMenuName(text)}
+              value={menu_name}
+              autoCapitalize="none"
+              placeholder="Menu Name"
             />
-            <View style={styles.contentContainer}>
-              <TextInput
-                style={styles.inputStyle}
-                onChangeText={(text) => onChangeMenuName(text)}
-                value={menu_name}
-                autoCapitalize="none"
-                placeholder="Menu Name"
-              />
-              <TextInput
-                style={styles.textArea}
-                onChangeText={(text) => onChangeMenuDescription(text)}
-                value={menu_description}
-                autoCapitalize="none"
-                placeholder="Menu Description"
-              />
-              <TextInput
-                style={styles.inputStyle}
-                onChangeText={(text) => onChangeMenuPrice(text)}
-                value={menu_price.toString()}
-                autoCapitalize="none"
-                placeholder="Menu Price"
-              />
-            </View>
-            <ButtonText
-              title="Save"
-              txtStyle={styles.btnText}
-              wrapperStyle={styles.btnWrapper}
-              onPress={editMenu}
-              isLoading
+            <TextInput
+              style={styles.textArea}
+              onChangeText={(text) => onChangeMenuDescription(text)}
+              value={menu_description}
+              autoCapitalize="none"
+              placeholder="Menu Description"
             />
-          </ScrollView>
-        </View>
-      )}
+            <TextInput
+              style={styles.inputStyle}
+              onChangeText={(text) => onChangeMenuPrice(text)}
+              value={menu_price.toString()}
+              autoCapitalize="none"
+              placeholder="Menu Price"
+            />
+          </View>
+          <ButtonText
+            title="Save"
+            txtStyle={styles.btnText}
+            wrapperStyle={styles.btnWrapper}
+            onPress={editMenu}
+            isLoading={isLoading}
+          />
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

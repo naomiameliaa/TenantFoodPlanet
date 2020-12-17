@@ -1,12 +1,12 @@
 import * as React from 'react';
-import {View, SafeAreaView, Image, StyleSheet, Dimensions} from 'react-native';
+import {View, SafeAreaView, Image, StyleSheet} from 'react-native';
+import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {getData, normalize} from '../utils';
-
-const {width: SCREEN_WIDTH} = Dimensions.get('window');
+import {getData, normalize, alertMessage, removeData} from '../utils';
+import {AuthContext} from '../../context';
 
 const styles = StyleSheet.create({
   container: {
@@ -59,19 +59,53 @@ const styles = StyleSheet.create({
 
 function HomePage({navigation}) {
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoadingLogout, setisLoadingLogout] = React.useState(false);
   const [isSoundOn, setIsSoundOn] = React.useState(true);
-  let tenantName;
+  const {signOut} = React.useContext(AuthContext);
+  const [tenantName, setTenantName] = React.useState('');
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
-    if (dataTenantAdmin !== null) {
-      tenantName = dataTenantAdmin.tenantName;
+    if (dataTenantAdmin) {
+      setTenantName(dataTenantAdmin.tenantName);
     }
   };
 
+  const signOutTenant = async () => {
+    const removeLocalData = await removeData('tenantAdminData');
+    if (removeLocalData) {
+      signOut();
+    }
+  };
+
+  async function logout() {
+    setisLoadingLogout(true);
+    try {
+      const response = await axios.post(
+        'https://food-planet.herokuapp.com/users/logout',
+      );
+      if (response.data.object === 'Logout success') {
+        alertMessage({
+          titleMessage: 'Success',
+          bodyMessage: 'Logout success!',
+          btnText: 'OK',
+          onPressOK: () => signOutTenant(),
+          btnCancel: false,
+        });
+      }
+    } catch (error) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Please try again later',
+        btnText: 'Try Again',
+        btnCancel: false,
+      });
+    }
+    setisLoadingLogout(false);
+  }
+
   React.useEffect(() => {
     getDataTenantAdmin();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -91,7 +125,13 @@ function HomePage({navigation}) {
               onPress={() => setIsSoundOn(true)}
             />
           )}
-          <ButtonText title="Log out" txtStyle={styles.logoutTxt} />
+          <ButtonText
+            title="Log out"
+            txtStyle={styles.logoutTxt}
+            onPress={() => logout()}
+            isLoading={isLoadingLogout}
+            colorSpinner={theme.colors.red}
+          />
         </View>
         <Title text={`Welcome, ${tenantName}!`} txtStyle={styles.titleStyle} />
         <View style={styles.horizontalWrapper}>

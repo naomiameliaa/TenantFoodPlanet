@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Image, StyleSheet } from 'react-native';
+import {TouchableOpacity, Image, StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
   btnWrapper: {
@@ -14,11 +14,12 @@ const styles = StyleSheet.create({
   },
 });
 
-function ButtonKit({ source, onPress, btnStyle, wrapperStyle }) {
+function ButtonKit({source, onPress, btnStyle, wrapperStyle, disabled}) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.btnWrapper, wrapperStyle]}>
+      style={[styles.btnWrapper, wrapperStyle]}
+      disabled={disabled ? true : false}>
       <Image
         style={[styles.btnImage, btnStyle]}
         source={source}

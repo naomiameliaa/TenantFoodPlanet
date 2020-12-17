@@ -121,7 +121,6 @@ function ManageMenu({navigation}) {
       );
       if (response.data.msg === 'Query success') {
         setMenuData(response.data.object);
-        console.log('MENU DATA: ', response.data.object);
       }
     } catch (error) {
       console.log(error);
@@ -139,7 +138,6 @@ function ManageMenu({navigation}) {
           },
         },
       );
-      console.log('data yang diapus', response.data);
       if (response.status === 200) {
         getMenuData();
         alertMessage({

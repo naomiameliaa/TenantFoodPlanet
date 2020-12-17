@@ -11,11 +11,10 @@ import {
   Dimensions,
 } from 'react-native';
 import axios from 'axios';
-import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, removeData, alertMessage} from '../utils';
+import {normalize, getData, alertMessage} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -27,6 +26,9 @@ const styles = StyleSheet.create({
   innerContainer: {
     padding: normalize(10),
   },
+  contentContainer: {
+    height: '90%',
+  },
   titleText: {
     fontSize: normalize(22),
     marginTop: 15,
@@ -37,31 +39,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.white,
     marginVertical: 5,
     paddingHorizontal: 15,
-    paddingVertical: 5,
-  },
-  fcNameStyle: {
-    fontWeight: 'bold',
-    color: theme.colors.red,
-    fontSize: normalize(15),
-    width: '75%',
-  },
-  fcNameDateWrapper: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: 7,
-  },
-  txtStyle: {
-    fontWeight: 'bold',
-    fontSize: normalize(13),
-    marginVertical: 5,
-  },
-  totalPerTenant: {
-    fontWeight: 'bold',
-    fontSize: normalize(13),
-    marginVertical: 5,
-    alignSelf: 'flex-end',
+    paddingVertical: 10,
   },
   spinnerKitStyle: {
     marginTop: normalize(80),
@@ -80,6 +58,35 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginVertical: 10,
   },
+  boldStyle: {
+    fontSize: normalize(14),
+    fontWeight: 'bold',
+  },
+  titleWrapper: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  btnText: {
+    color: theme.colors.white,
+    fontSize: normalize(12),
+    fontWeight: 'bold',
+  },
+  detailWrapper: {
+    marginBottom: 10,
+  },
+  horizontalWrapper: {
+    flexDirection: 'row',
+  },
+  quantity: {
+    width: '10%',
+  },
+  totalPrice: {
+    fontSize: normalize(12),
+    fontWeight: 'bold',
+    alignSelf: 'flex-end',
+  },
 });
 
 function PastOrder({navigation}) {
@@ -92,29 +99,6 @@ function PastOrder({navigation}) {
       return dataTenantAdmin.tenantId;
     } else {
       return null;
-    }
-  };
-
-  const renderStatus = (status) => {
-    if (status === 'PICKED_UP') {
-      return 'Status: Order already picked-up';
-    } else {
-      return 'Status: Your order is complete';
-    }
-  };
-
-  const renderDate = (dateTime) => {
-    let i = 0;
-    let dates = '';
-    let spaces = 0;
-    for (; i < dateTime.length; i++) {
-      dates += dateTime[i];
-      if (dateTime[i] === ' ') {
-        spaces++;
-        if (spaces === 2) {
-          return dates;
-        }
-      }
     }
   };
 
@@ -147,36 +131,33 @@ function PastOrder({navigation}) {
         key={idx}
         onPress={() =>
           navigation.navigate('Order Detail', {
-            foodcourtName: item.foodcourtName,
+            orderNum: item.orderNum,
             transactionDate: item.date,
-            seatNum: item.seatNum,
-            totalSeat: item.totalSeat,
+            status: item.status,
             totalPrice: item.totalPrice,
-            orderList: item.orderList,
+            dataOrder: item.detail,
           })
         }>
-        <View style={styles.fcNameDateWrapper}>
-          <Text style={styles.fcNameStyle} numberOfLines={1}>
-            {item.foodcourtName}
+        <View style={styles.titleWrapper}>
+          <Text style={styles.boldStyle}>Order No. {item.orderNum}</Text>
+          <Text style={styles.boldStyle}>
+            {(item.status === 'PICKED_UP' || item.status === 'FINISHED') &&
+              'FINISHED'}
           </Text>
-          <Text>{renderDate(item.date)}</Text>
         </View>
-        {item.orderList.map((itm, key) => {
+        {item.detail.map((itm, key) => {
           return (
-            <View key={key}>
-              <Text style={styles.txtStyle}>
-                {`${itm.tenantName} (Order Number: ${itm.orderNum})`}
-              </Text>
-              <Text style={styles.itemStatusStyle}>
-                {`${itm.items} items   ${renderStatus(itm.status)}`}
-              </Text>
-              <Text style={styles.totalPerTenant}>
-                {`Total: Rp ${renderPrice(itm.subtotal)}`}
-              </Text>
+            <View style={styles.detailWrapper} key={key}>
+              <View style={styles.horizontalWrapper}>
+                <Text style={styles.quantity}>{`${itm.quantity}x`}</Text>
+                <Text>{itm.menuName}</Text>
+              </View>
             </View>
           );
         })}
-        <Text style={styles.txtStyle}>{`Seat Number : ${item.seatNum}`}</Text>
+        <Text style={styles.totalPrice}>
+          {`TOTAL Rp ${renderPrice(item.totalPrice)}`}
+        </Text>
       </TouchableOpacity>
     );
   };
@@ -195,7 +176,6 @@ function PastOrder({navigation}) {
         },
       );
       if (response.data.msg === 'Query success') {
-        console.log('OrderData: ', response.data.object);
         setOrderData(response.data.object);
       }
     } catch (error) {
@@ -213,29 +193,31 @@ function PastOrder({navigation}) {
     <SafeAreaView style={styles.container}>
       <View style={styles.innerContainer}>
         <Title text="Past Order" txtStyle={styles.titleText} />
-        {orderData.length === 0 ? (
-          <View style={styles.emptyOrderContainer}>
-            <Image
-              source={require('../assets/dinner.png')}
-              style={styles.emptyOrderStyle}
-            />
-            <Text style={styles.titleEmptyOrder}>
-              There is No Ongoing Order
-            </Text>
-          </View>
-        ) : (
-          <ScrollView>
-            {isLoading ? (
-              <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
-            ) : (
-              <FlatList
-                data={orderData}
-                renderItem={({item, idx}) => renderItem({item, idx})}
-                keyExtractor={(item) => item.orderId.toString()}
-              />
-            )}
-          </ScrollView>
-        )}
+        <ScrollView style={styles.contentContainer}>
+          {isLoading ? (
+            <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
+          ) : (
+            <View>
+              {orderData.length === 0 ? (
+                <View style={styles.emptyOrderContainer}>
+                  <Image
+                    source={require('../assets/dinner.png')}
+                    style={styles.emptyOrderStyle}
+                  />
+                  <Text style={styles.titleEmptyOrder}>
+                    There is No Past Order
+                  </Text>
+                </View>
+              ) : (
+                <FlatList
+                  data={orderData}
+                  renderItem={({item, idx}) => renderItem({item, idx})}
+                  keyExtractor={(item) => item.orderId.toString()}
+                />
+              )}
+            </View>
+          )}
+        </ScrollView>
       </View>
     </SafeAreaView>
   );

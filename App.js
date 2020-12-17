@@ -14,6 +14,7 @@ import AddMenu from './src/screens/AddMenuPage';
 import EditMenu from './src/screens/EditMenuPage';
 import MenuDetail from './src/screens/MenuDetailPage';
 import ForgotPassword from './src/screens/ForgotPassword';
+import OrderDetail from './src/screens/OrderDetailPage';
 
 const AuthStack = createStackNavigator();
 const AuthStackScreen = () => (
@@ -73,6 +74,11 @@ function HomeStackScreen() {
       <HomeStack.Screen
         name="Change Password"
         component={ChangePassword}
+        options={{headerShown: false}}
+      />
+      <HomeStack.Screen
+        name="Order Detail"
+        component={OrderDetail}
         options={{headerShown: false}}
       />
     </HomeStack.Navigator>

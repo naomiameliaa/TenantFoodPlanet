@@ -1,6 +1,7 @@
 import React from 'react';
 import {TouchableOpacity, Text, StyleSheet} from 'react-native';
 import theme from '../theme';
+import SpinnerKit from '../components/SpinnerKit';
 
 const styles = StyleSheet.create({
   btnWrapper: {
@@ -13,12 +14,25 @@ const styles = StyleSheet.create({
   },
 });
 
-function ButtonText({title, onPress, txtStyle, wrapperStyle}) {
+function ButtonText({
+  title,
+  onPress,
+  txtStyle,
+  wrapperStyle,
+  isLoading,
+  colorSpinner,
+}) {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={[styles.btnWrapper, wrapperStyle]}>
-      <Text style={[styles.title, txtStyle]}>{title}</Text>
+      {isLoading ? (
+        <SpinnerKit
+          colorSpinner={colorSpinner ? colorSpinner : theme.colors.white}
+        />
+      ) : (
+        <Text style={[styles.title, txtStyle]}>{title}</Text>
+      )}
     </TouchableOpacity>
   );
 }

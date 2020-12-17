@@ -1,12 +1,10 @@
 import * as React from 'react';
 import {
   View,
-  Text,
   Image,
   TextInput,
   SafeAreaView,
   StyleSheet,
-  Dimensions,
   ScrollView,
 } from 'react-native';
 import axios from 'axios';
@@ -15,10 +13,7 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {normalize, getData, alertMessage} from '../utils';
-import SpinnerKit from '../components/SpinnerKit';
 import ImagePicker from 'react-native-image-picker';
-
-const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -56,11 +51,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     paddingHorizontal: 20,
     marginVertical: 8,
-  },
-  imageSections: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    justifyContent: 'center',
+    textAlignVertical: 'top',
   },
   btnImage: {
     alignSelf: 'flex-end',
@@ -103,10 +94,7 @@ function AddMenu({navigation}) {
   const [menuDescription, onChangeMenuDescription] = React.useState('');
   const [menuPrice, onChangeMenuPrice] = React.useState('');
   const [fileData, setFileData] = React.useState('');
-  const [filePath, setFilePath] = React.useState('');
-
-  const [errorMessage, setErrorMessage] = React.useState('');
-  const [isLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
@@ -118,6 +106,7 @@ function AddMenu({navigation}) {
   };
 
   async function addNewMenu() {
+    setIsLoading(true);
     const tenantId = await getDataTenantAdmin();
     try {
       const response = await axios.post(
@@ -142,11 +131,12 @@ function AddMenu({navigation}) {
     } catch (error) {
       alertMessage({
         titleMessage: 'Error',
-        bodyMessage: 'Failed add new tenant',
+        bodyMessage: 'Add new menu failed, please try again!',
         btnText: 'Try Again',
         btnCancel: false,
       });
     }
+    setIsLoading(false);
   }
 
   function chooseImage() {
@@ -166,8 +156,6 @@ function AddMenu({navigation}) {
      * The second arg is the callback which sends object: response (more info in the API Reference)
      */
     ImagePicker.showImagePicker(options, (response) => {
-      console.log('Response = ', response);
-
       if (response.didCancel) {
         console.log('User cancelled image picker');
       } else if (response.error) {
@@ -175,10 +163,7 @@ function AddMenu({navigation}) {
       } else if (response.customButton) {
         console.log('User tapped custom button: ', response.customButton);
       } else {
-        const source = {uri: 'data:image/jpeg;base64,' + response.data};
-        setFilePath(response);
         setFileData(response.data);
-        console.log('THIS IS FILEDATA', response.data);
       }
     });
   }
@@ -200,51 +185,47 @@ function AddMenu({navigation}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {isLoading ? (
-        <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
-      ) : (
-        <View style={styles.innerContainer}>
-          <Title text="Add Menu" txtStyle={styles.titleText} />
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.ImageSections}>{renderFileData()}</View>
-            <ButtonKit
-              source={require('../assets/photo.png')}
-              wrapperStyle={styles.btnImage}
-              onPress={chooseImage}
+      <View style={styles.innerContainer}>
+        <Title text="Add Menu" txtStyle={styles.titleText} />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {renderFileData()}
+          <ButtonKit
+            source={require('../assets/photo.png')}
+            wrapperStyle={styles.btnImage}
+            onPress={chooseImage}
+          />
+          <View style={styles.contentContainer}>
+            <TextInput
+              style={styles.inputStyle}
+              onChangeText={(text) => onChangeMenuName(text)}
+              value={menuName}
+              autoCapitalize="none"
+              placeholder="Menu Name"
             />
-            <View style={styles.contentContainer}>
-              <TextInput
-                style={styles.inputStyle}
-                onChangeText={(text) => onChangeMenuName(text)}
-                value={menuName}
-                autoCapitalize="none"
-                placeholder="Menu Name"
-              />
-              <TextInput
-                style={styles.textArea}
-                onChangeText={(text) => onChangeMenuDescription(text)}
-                value={menuDescription}
-                autoCapitalize="none"
-                placeholder="Menu Description"
-              />
-              <TextInput
-                style={styles.inputStyle}
-                onChangeText={(text) => onChangeMenuPrice(text)}
-                value={menuPrice}
-                autoCapitalize="none"
-                placeholder="Menu Price"
-              />
-            </View>
-            <ButtonText
-              title="Save"
-              txtStyle={styles.btnText}
-              wrapperStyle={styles.btnWrapper}
-              onPress={addNewMenu}
-              isLoading
+            <TextInput
+              style={styles.textArea}
+              onChangeText={(text) => onChangeMenuDescription(text)}
+              value={menuDescription}
+              autoCapitalize="none"
+              placeholder="Menu Description"
             />
-          </ScrollView>
-        </View>
-      )}
+            <TextInput
+              style={styles.inputStyle}
+              onChangeText={(text) => onChangeMenuPrice(text)}
+              value={menuPrice}
+              autoCapitalize="none"
+              placeholder="Menu Price"
+            />
+          </View>
+          <ButtonText
+            title="Save"
+            txtStyle={styles.btnText}
+            wrapperStyle={styles.btnWrapper}
+            onPress={addNewMenu}
+            isLoading={isLoading}
+          />
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

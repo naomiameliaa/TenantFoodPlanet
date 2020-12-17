@@ -7,10 +7,12 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
+import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
+import {alertMessage} from '../utils';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -80,6 +82,48 @@ const styles = StyleSheet.create({
 
 function ForgotPassword({navigation}) {
   const [email, onChangeEmail] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  function validationEmail() {
+    if (email === '') {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Email field is required',
+        btnText: 'OK',
+        btnCancel: true,
+      });
+    } else {
+      sendEmail();
+    }
+  }
+
+  async function sendEmail() {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        `https://food-planet.herokuapp.com/users/forgotPassword?email=${email}`,
+      );
+      if (response.data.msg === 'Forgot password success') {
+        alertMessage({
+          titleMessage: 'Success',
+          bodyMessage: 'Please kindly check your email',
+          btnText: 'OK',
+          onPressOK: () => navigation.goBack(),
+          btnCancel: true,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      alertMessage({
+        titleMessage: 'Failed',
+        bodyMessage: 'Please try again later',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    }
+    setIsLoading(false);
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.innerContainer}>
@@ -99,12 +143,15 @@ function ForgotPassword({navigation}) {
             onChangeText={(text) => onChangeEmail(text)}
             value={email}
             textContentType="emailAddress"
+            autoCapitalize="none"
             placeholder="Email"
           />
           <ButtonText
             title="Send"
             txtStyle={styles.sendTxt}
             wrapperStyle={styles.sendWrapper}
+            onPress={validationEmail}
+            isLoading={isLoading}
           />
         </View>
       </View>

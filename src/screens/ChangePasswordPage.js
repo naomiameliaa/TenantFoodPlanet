@@ -2,18 +2,16 @@ import * as React from 'react';
 import {
   View,
   TextInput,
-  Image,
+  Text,
   SafeAreaView,
   StyleSheet,
   Dimensions,
 } from 'react-native';
 import axios from 'axios';
-import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, removeData, alertMessage} from '../utils';
-import SpinnerKit from '../components/SpinnerKit';
+import {normalize, getData, alertMessage} from '../utils';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -45,7 +43,7 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: theme.colors.white,
-    fontSize: normalize(18),
+    fontSize: normalize(16),
     fontWeight: 'bold',
   },
   btnWrapper: {
@@ -56,9 +54,30 @@ const styles = StyleSheet.create({
     marginVertical: 5,
     alignSelf: 'center',
   },
+  inputStyleError: {
+    width: '90%',
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: theme.colors.white,
+    fontSize: 18,
+    paddingHorizontal: 20,
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
+  },
+  content: {
+    width: SCREEN_WIDTH * 0.8,
+    fontSize: 16,
+    color: theme.colors.grey,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
 });
 
 function ChangePassword({navigation}) {
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [oldPassword, onChangeOldPassword] = React.useState('');
   const [password, onChangePassword] = React.useState('');
   const [confirmPassword, onChangeConfirmPassword] = React.useState('');
 
@@ -71,45 +90,68 @@ function ChangePassword({navigation}) {
     }
   };
 
-  async function changePassword() {
-    if (password !== confirmPassword) {
+  function validationPassword() {
+    if (confirmPassword !== password) {
       alertMessage({
-        titleMessage: 'Failed',
+        titleMessage: 'Error',
         bodyMessage: 'Password does not match',
         btnText: 'Try Again',
-        btnCancel: false,
+        btnCancel: true,
       });
+    } else {
+      changePassword();
     }
+  }
 
+  async function changePassword() {
+    setIsLoading(true);
     try {
       const userId = await getDataTenantAdmin();
       const response = await axios.post(
-        'http://172.18.0.1:8080/users/changePassword',
-        {
-          userId: userId,
-        },
+        `http://food-planet.herokuapp.com/users/changePassword?userId=${userId}&oldPassword=${oldPassword}&newPassword=${confirmPassword}`,
       );
       if (response.data.msg === 'Change password success') {
-        console.log('Success');
         alertMessage({
           titleMessage: 'Success',
-          bodyMessage: 'Password change successfully',
+          bodyMessage: 'Password changed successfully',
           btnText: 'OK',
           onPressOK: () => navigation.goBack(),
           btnCancel: false,
         });
       }
     } catch (error) {
-      console.log(error);
+      alertMessage({
+        titleMessage: 'Failed',
+        bodyMessage: 'Please try again later',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
     }
+    setIsLoading(false);
   }
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.innerContainer}>
         <Title text="Change Password" txtStyle={styles.titleText} />
+        <Text style={styles.content}>
+          Please enter your old password and then your new password.
+        </Text>
         <TextInput
           style={styles.txtInput}
+          onChangeText={(text) => onChangeOldPassword(text)}
+          value={oldPassword}
+          textContentType="password"
+          secureTextEntry={true}
+          autoCapitalize="none"
+          placeholder="Old Password"
+        />
+        <TextInput
+          style={
+            confirmPassword !== password
+              ? styles.inputStyleError
+              : styles.txtInput
+          }
           onChangeText={(text) => onChangePassword(text)}
           value={password}
           textContentType="password"
@@ -118,20 +160,25 @@ function ChangePassword({navigation}) {
           placeholder="New Password"
         />
         <TextInput
-          style={styles.txtInput}
+          style={
+            confirmPassword !== password
+              ? styles.inputStyleError
+              : styles.txtInput
+          }
           onChangeText={(text) => onChangeConfirmPassword(text)}
           value={confirmPassword}
           textContentType="password"
           secureTextEntry={true}
           autoCapitalize="none"
-          placeholder="Confirm Password"
+          placeholder="Confirm New Password"
         />
       </View>
       <ButtonText
-        title="Save"
+        title="Submit"
         txtStyle={styles.btnText}
         wrapperStyle={styles.btnWrapper}
-        onPress={changePassword}
+        onPress={() => validationPassword()}
+        isLoading={isLoading}
       />
     </SafeAreaView>
   );

@@ -4,7 +4,6 @@ import {
   TextInput,
   SafeAreaView,
   StyleSheet,
-  Dimensions,
   ImageBackground,
 } from 'react-native';
 import axios from 'axios';
@@ -13,8 +12,6 @@ import Title from '../components/Title';
 import theme from '../theme';
 import {AuthContext} from '../../context';
 import {storeData, alertMessage, normalize} from '../utils';
-
-const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -75,6 +72,7 @@ const styles = StyleSheet.create({
 
 function LandingPage({navigation}) {
   const {signIn} = React.useContext(AuthContext);
+  const [isLoading, setIsLoading] = React.useState(false);
   const [email, onChangeEmail] = React.useState('');
   const [password, onChangePassword] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState('');
@@ -87,12 +85,12 @@ function LandingPage({navigation}) {
         btnText: 'Try Again',
         btnCancel: false,
       });
-    } else {
-      login();
     }
+    login();
   };
 
   async function login() {
+    setIsLoading(true);
     try {
       const response = await axios.get(
         'https://food-planet.herokuapp.com/users/login',
@@ -101,15 +99,12 @@ function LandingPage({navigation}) {
             role: 'tenant',
           },
           auth: {
-            username: email,
+            username: email.toLowerCase(),
             password: password,
-
-            // username: 'tenantAdmin@mail.com',
-            // password: 'password',
           },
         },
       );
-      if (response.status === 200) {
+      if (response.data.msg === 'Login success') {
         storeData('tenantAdminData', response.data.object);
         signIn();
       }
@@ -123,6 +118,7 @@ function LandingPage({navigation}) {
       setErrorMessage('Something went wrong');
       console.log('error:', error);
     }
+    setIsLoading(false);
   }
   return (
     <SafeAreaView style={styles.container}>
@@ -138,6 +134,7 @@ function LandingPage({navigation}) {
               value={email}
               textContentType="emailAddress"
               autoCapitalize="none"
+              autoCompleteType="email"
               placeholder="Tenant Email"
             />
             <TextInput
@@ -146,6 +143,7 @@ function LandingPage({navigation}) {
               value={password}
               textContentType="password"
               autoCapitalize="none"
+              autoCompleteType="password"
               placeholder="Password"
               secureTextEntry={true}
             />
@@ -160,6 +158,7 @@ function LandingPage({navigation}) {
               txtStyle={styles.loginTxt}
               wrapperStyle={styles.loginWrapper}
               onPress={validationLogin}
+              isLoading={isLoading}
             />
           </View>
         </View>
