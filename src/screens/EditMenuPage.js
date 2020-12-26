@@ -12,8 +12,9 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, alertMessage} from '../utils';
+import {normalize, alertMessage, getData, removeData} from '../utils';
 import ImagePicker from 'react-native-image-picker';
+import {AuthContext} from "../../context";
 
 const styles = StyleSheet.create({
   container: {
@@ -104,6 +105,27 @@ function EditMenu({navigation, route}) {
   const [menu_price, onChangeMenuPrice] = React.useState(menuPrice);
   const [fileData, setFileData] = React.useState(menuImage);
   const [isLoading, setIsLoading] = React.useState(false);
+  const {signOut} = React.useContext(AuthContext);
+
+  const logout = async () => {
+    const dataUser = await getData('tenantAdminData');
+    if (dataUser !== null) {
+      await removeData('tenantAdminData');
+      await signOut();
+    }
+  };
+
+  function sessionTimedOut () {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
 
   async function editMenu() {
     setIsLoading(true);
@@ -128,12 +150,16 @@ function EditMenu({navigation, route}) {
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Update menu failed',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
+      if(error.response.status === 401) {
+        sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Error',
+          bodyMessage: 'Update menu failed',
+          btnText: 'Try Again',
+          btnCancel: false,
+        });
+      }
     }
     setIsLoading(false);
   }

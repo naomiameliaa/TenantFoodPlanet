@@ -8,6 +8,8 @@ target 'tenantAdmin' do
 
   use_react_native!(:path => config["reactNativePath"])
 
+  pod 'RNFirebase', :path => '../node_modules/react-native-firebase'
+
   target 'tenantAdminTests' do
     inherit! :complete
     # Pods for testing

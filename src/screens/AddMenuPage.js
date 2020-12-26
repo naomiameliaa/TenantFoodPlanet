@@ -12,8 +12,9 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage} from '../utils';
+import {normalize, getData, alertMessage, removeData} from '../utils';
 import ImagePicker from 'react-native-image-picker';
+import {AuthContext} from "../../context";
 
 const styles = StyleSheet.create({
   container: {
@@ -95,6 +96,7 @@ function AddMenu({navigation}) {
   const [menuPrice, onChangeMenuPrice] = React.useState('');
   const [fileData, setFileData] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const {signOut} = React.useContext(AuthContext);
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
@@ -104,6 +106,26 @@ function AddMenu({navigation}) {
       return null;
     }
   };
+
+  const logout = async () => {
+    const dataUser = await getData('tenantAdminData');
+    if (dataUser !== null) {
+      await removeData('tenantAdminData');
+      await signOut();
+    }
+  };
+
+  function sessionTimedOut () {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
 
   async function addNewMenu() {
     setIsLoading(true);
@@ -129,12 +151,16 @@ function AddMenu({navigation}) {
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Add new menu failed, please try again!',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
+      if(error.response.status === 401) {
+          sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Error',
+          bodyMessage: 'Add new menu failed, please try again!',
+          btnText: 'Try Again',
+          btnCancel: false,
+        });
+      }
     }
     setIsLoading(false);
   }

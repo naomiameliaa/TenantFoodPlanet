@@ -13,9 +13,10 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage} from '../utils';
+import {normalize, getData, alertMessage, removeData} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
 import {FlatList} from 'react-native-gesture-handler';
+import {AuthContext} from "../../context";
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -93,6 +94,7 @@ const styles = StyleSheet.create({
 function ManageMenu({navigation}) {
   const [menuData, setMenuData] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const {signOut} = React.useContext(AuthContext);
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
@@ -103,6 +105,26 @@ function ManageMenu({navigation}) {
     }
   };
 
+  const logout = async () => {
+    const dataUser = await getData('tenantAdminData');
+    if (dataUser !== null) {
+      await removeData('tenantAdminData');
+      await signOut();
+    }
+  };
+
+  function sessionTimedOut () {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
+
   async function getMenuData() {
     setIsLoading(true);
     const tenantId = await getDataTenantAdmin();
@@ -112,18 +134,15 @@ function ManageMenu({navigation}) {
         {
           params: {
             tenantId: tenantId,
-          },
-          auth: {
-            username: 'tenantAdmin@mail.com',
-            password: 'password',
-          },
+          }
         },
       );
       if (response.data.msg === 'Query success') {
         setMenuData(response.data.object);
       }
     } catch (error) {
-      console.log(error);
+      sessionTimedOut();
+      console.log(error.response);
     }
     setIsLoading(false);
   }
@@ -139,7 +158,7 @@ function ManageMenu({navigation}) {
         },
       );
       if (response.status === 200) {
-        getMenuData();
+        await getMenuData();
         alertMessage({
           titleMessage: 'Success!',
           bodyMessage: 'Succeed delete menu.',
@@ -148,12 +167,16 @@ function ManageMenu({navigation}) {
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Failed!',
-        bodyMessage: 'Failed delete menu, Please try again later.',
-        btnText: 'Try Again',
-        btnCancel: true,
-      });
+      if(error.response.status === 401) {
+        sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Failed!',
+          bodyMessage: 'Failed delete menu, Please try again later.',
+          btnText: 'Try Again',
+          btnCancel: true,
+        });
+      }
       console.log(error);
     }
   }

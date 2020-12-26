@@ -12,7 +12,8 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {alertMessage} from '../utils';
+import {alertMessage, getData, removeData} from '../utils';
+import {AuthContext} from "../../context";
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -83,6 +84,7 @@ const styles = StyleSheet.create({
 function ForgotPassword({navigation}) {
   const [email, onChangeEmail] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
+  const {signOut} = React.useContext(AuthContext);
 
   function validationEmail() {
     if (email === '') {
@@ -95,6 +97,26 @@ function ForgotPassword({navigation}) {
     } else {
       sendEmail();
     }
+  }
+
+  const logout = async () => {
+    const dataUser = await getData('tenantAdminData');
+    if (dataUser !== null) {
+      await removeData('tenantAdminData');
+      await signOut();
+    }
+  };
+
+  function sessionTimedOut () {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
   }
 
   async function sendEmail() {
@@ -113,13 +135,17 @@ function ForgotPassword({navigation}) {
         });
       }
     } catch (error) {
-      console.log(error);
-      alertMessage({
-        titleMessage: 'Failed',
-        bodyMessage: 'Please try again later',
-        btnText: 'Try Again',
-        btnCancel: true,
-      });
+      if(error.response.status === 401) {
+        sessionTimedOut();
+      }else {
+        console.log(error);
+        alertMessage({
+          titleMessage: 'Failed',
+          bodyMessage: 'Please try again later',
+          btnText: 'Try Again',
+          btnCancel: true,
+        });
+      }
     }
     setIsLoading(false);
   }

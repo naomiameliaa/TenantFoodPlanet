@@ -11,7 +11,8 @@ import axios from 'axios';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage} from '../utils';
+import {normalize, getData, alertMessage, removeData} from '../utils';
+import {AuthContext} from "../../context";
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -80,6 +81,7 @@ function ChangePassword({navigation}) {
   const [oldPassword, onChangeOldPassword] = React.useState('');
   const [password, onChangePassword] = React.useState('');
   const [confirmPassword, onChangeConfirmPassword] = React.useState('');
+  const {signOut} = React.useContext(AuthContext);
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
@@ -103,6 +105,26 @@ function ChangePassword({navigation}) {
     }
   }
 
+  const logout = async () => {
+    const dataUser = await getData('tenantAdminData');
+    if (dataUser !== null) {
+      await removeData('tenantAdminData');
+      await signOut();
+    }
+  };
+
+  function sessionTimedOut () {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
+
   async function changePassword() {
     setIsLoading(true);
     try {
@@ -120,12 +142,16 @@ function ChangePassword({navigation}) {
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Failed',
-        bodyMessage: 'Please try again later',
-        btnText: 'Try Again',
-        btnCancel: true,
-      });
+      if(error.response.status === 401) {
+        sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Failed',
+          bodyMessage: 'Please try again later',
+          btnText: 'Try Again',
+          btnCancel: true,
+        });
+      }
     }
     setIsLoading(false);
   }
