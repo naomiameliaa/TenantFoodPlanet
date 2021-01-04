@@ -16,7 +16,7 @@ import theme from '../theme';
 import {normalize, getData, alertMessage, removeData} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
 import {FlatList} from 'react-native-gesture-handler';
-import {AuthContext} from "../../context";
+import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -113,7 +113,7 @@ function ManageMenu({navigation}) {
     }
   };
 
-  function sessionTimedOut () {
+  function sessionTimedOut() {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -134,7 +134,7 @@ function ManageMenu({navigation}) {
         {
           params: {
             tenantId: tenantId,
-          }
+          },
         },
       );
       if (response.data.msg === 'Query success') {
@@ -167,9 +167,9 @@ function ManageMenu({navigation}) {
         });
       }
     } catch (error) {
-      if(error.response.status === 401) {
+      if (error.response.status === 401) {
         sessionTimedOut();
-      }else {
+      } else {
         alertMessage({
           titleMessage: 'Failed!',
           bodyMessage: 'Failed delete menu, Please try again later.',
