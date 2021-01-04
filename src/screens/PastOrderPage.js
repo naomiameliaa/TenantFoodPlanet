@@ -163,32 +163,13 @@ function PastOrder({navigation}) {
     );
   };
 
-  const signOutTenant = async () => {
-    const removeLocalData = await removeData('tenantAdminData');
-    if (removeLocalData) {
-      signOut();
+  const logout = async () => {
+    const dataUser = await getData('tenantAdminData');
+    if (dataUser !== null) {
+      await removeData('tenantAdminData');
+      await signOut();
     }
   };
-
-  async function logout() {
-    setIsLoading(true);
-    try {
-      const response = await axios.post(
-        'https://food-planet.herokuapp.com/users/logout',
-      );
-      if (response.data.object === 'Logout success') {
-        signOutTenant();
-      }
-    } catch (error) {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Please try again later',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
-    }
-    setIsLoading(false);
-  }
 
   function sessionTimedOut() {
     alertMessage({
@@ -213,6 +194,7 @@ function PastOrder({navigation}) {
         setOrderData(response.data.object);
       }
     } catch (error) {
+      sessionTimedOut();
       console.log(error);
       if (error.response.status === 401) {
         sessionTimedOut();

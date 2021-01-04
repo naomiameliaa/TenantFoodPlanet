@@ -11,7 +11,7 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {AuthContext} from '../../context';
-import {storeData, alertMessage, normalize} from '../utils';
+import {storeData, alertMessage, normalize, saveFcmToken} from '../utils';
 
 const styles = StyleSheet.create({
   container: {
@@ -102,6 +102,7 @@ function LandingPage({navigation}) {
       );
       if (response.data.msg === 'Login success') {
         storeData('tenantAdminData', response.data.object);
+        await saveFcmToken();
         signIn();
       }
     } catch (error) {

@@ -1,5 +1,10 @@
 rootProject.name = 'tenantAdmin'
+<<<<<<< HEAD
 include ':react-native-image-picker'
 project(':react-native-image-picker').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-image-picker/android')
+=======
+include ':react-native-firebase'
+project(':react-native-firebase').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-firebase/android')
+>>>>>>> ee2646d5b226d9c5f0ea304100bf2efe77f50ccb
 apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
 include ':app'

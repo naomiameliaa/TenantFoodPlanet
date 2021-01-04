@@ -102,32 +102,13 @@ function ManageMenu({navigation}) {
     }
   };
 
-  const signOutTenant = async () => {
-    const removeLocalData = await removeData('tenantAdminData');
-    if (removeLocalData) {
-      signOut();
+  const logout = async () => {
+    const dataUser = await getData('tenantAdminData');
+    if (dataUser !== null) {
+      await removeData('tenantAdminData');
+      await signOut();
     }
   };
-
-  async function logout() {
-    setIsLoading(true);
-    try {
-      const response = await axios.post(
-        'https://food-planet.herokuapp.com/users/logout',
-      );
-      if (response.data.object === 'Logout success') {
-        signOutTenant();
-      }
-    } catch (error) {
-      alertMessage({
-        titleMessage: 'Error',
-        bodyMessage: 'Please try again later',
-        btnText: 'Try Again',
-        btnCancel: false,
-      });
-    }
-    setIsLoading(false);
-  }
 
   function sessionTimedOut() {
     alertMessage({
@@ -176,7 +157,7 @@ function ManageMenu({navigation}) {
         },
       );
       if (response.status === 200) {
-        getMenuData();
+        await getMenuData();
         alertMessage({
           titleMessage: 'Success!',
           bodyMessage: 'Succeed delete menu.',
@@ -185,12 +166,16 @@ function ManageMenu({navigation}) {
         });
       }
     } catch (error) {
-      alertMessage({
-        titleMessage: 'Failed!',
-        bodyMessage: 'Failed delete menu, Please try again later.',
-        btnText: 'Try Again',
-        btnCancel: true,
-      });
+      if (error.response.status === 401) {
+        sessionTimedOut();
+      } else {
+        alertMessage({
+          titleMessage: 'Failed!',
+          bodyMessage: 'Failed delete menu, Please try again later.',
+          btnText: 'Try Again',
+          btnCancel: true,
+        });
+      }
       console.log(error);
     }
   }
