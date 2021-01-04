@@ -14,8 +14,9 @@ import axios from 'axios';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage} from '../utils';
+import {normalize, getData, alertMessage, removeData} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
+import {AuthContext} from "../../context";
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -113,6 +114,7 @@ function OngoingOrder({navigation}) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [isLoadingPickedUp, setIsLoadingPickedUp] = React.useState(false);
   const [isLoadingReady, setIsLoadingReady] = React.useState(false);
+  const {signOut} = React.useContext(AuthContext);
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
@@ -196,24 +198,39 @@ function OngoingOrder({navigation}) {
     );
   };
 
+  const logout = async () => {
+    const dataUser = await getData('tenantAdminData');
+    if (dataUser !== null) {
+      await removeData('tenantAdminData');
+      await signOut();
+    }
+  };
+
+  function sessionTimedOut () {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
+
   async function getOngoingOrder() {
     setIsLoading(true);
     const tenantId = await getDataTenantAdmin();
     try {
       const response = await axios.get(
         `https://food-planet.herokuapp.com/orders/tenant?tenantId=${tenantId}&status=PROCESSING&status=READY`,
-        {
-          auth: {
-            username: 'tenantAdmin@mail.com',
-            password: 'password',
-          },
-        },
       );
       console.log(response.data, 'ini response');
       if (response.data.msg === 'Query success') {
         setOrderData(response.data.object);
       }
     } catch (error) {
+      sessionTimedOut();
       console.log(error);
     }
     setIsLoading(false);
@@ -225,12 +242,6 @@ function OngoingOrder({navigation}) {
     try {
       const response = await axios.post(
         `https://food-planet.herokuapp.com/orders/setFoodReady?orderId=${orderId}&tenantId=${tenantId}`,
-        {
-          auth: {
-            username: 'tenantAdmin@mail.com',
-            password: 'password',
-          },
-        },
       );
       if (response.data.msg === 'Query success') {
         alertMessage({
@@ -242,12 +253,16 @@ function OngoingOrder({navigation}) {
       }
     } catch (error) {
       console.log(error);
-      alertMessage({
-        titleMessage: 'Failed',
-        bodyMessage: 'Please try again later!',
-        btnText: 'Try Again',
-        btnCancel: true,
-      });
+      if(error.response.status === 401) {
+        sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Failed',
+          bodyMessage: 'Please try again later!',
+          btnText: 'Try Again',
+          btnCancel: true,
+        });
+      }
     }
     setIsLoadingReady(false);
   }
@@ -258,12 +273,6 @@ function OngoingOrder({navigation}) {
     try {
       const response = await axios.post(
         `https://food-planet.herokuapp.com/orders/setOrderPickedUp?orderId=${orderId}&tenantId=${tenantId}`,
-        {
-          auth: {
-            username: 'tenantAdmin@mail.com',
-            password: 'password',
-          },
-        },
       );
       if (response.data.msg === 'Query success') {
         alertMessage({
@@ -275,12 +284,16 @@ function OngoingOrder({navigation}) {
       }
     } catch (error) {
       console.log(error);
-      alertMessage({
-        titleMessage: 'Failed',
-        bodyMessage: 'Please try again later!',
-        btnText: 'Try Again',
-        btnCancel: true,
-      });
+      if(error.response.status === 401) {
+        sessionTimedOut();
+      }else {
+        alertMessage({
+          titleMessage: 'Failed',
+          bodyMessage: 'Please try again later!',
+          btnText: 'Try Again',
+          btnCancel: true,
+        });
+      }
     }
     setIsLoadingPickedUp(false);
   }

@@ -14,8 +14,9 @@ import axios from 'axios';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage} from '../utils';
+import {normalize, getData, alertMessage, removeData} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
+import {AuthContext} from "../../context";
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -92,6 +93,7 @@ const styles = StyleSheet.create({
 function PastOrder({navigation}) {
   const [orderData, setOrderData] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const {signOut} = React.useContext(AuthContext);
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
@@ -162,23 +164,38 @@ function PastOrder({navigation}) {
     );
   };
 
+  const logout = async () => {
+    const dataUser = await getData('tenantAdminData');
+    if (dataUser !== null) {
+      await removeData('tenantAdminData');
+      await signOut();
+    }
+  };
+
+  function sessionTimedOut () {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
+
   async function getPastOrder() {
     setIsLoading(true);
     const tenantId = await getDataTenantAdmin();
     try {
       const response = await axios.get(
         `https://food-planet.herokuapp.com/orders/tenant?tenantId=${tenantId}&status=PICKED_UP&status=FINISHED`,
-        {
-          auth: {
-            username: 'tenantAdmin@mail.com',
-            password: 'password',
-          },
-        },
       );
       if (response.data.msg === 'Query success') {
         setOrderData(response.data.object);
       }
     } catch (error) {
+      sessionTimedOut();
       console.log(error);
     }
     setIsLoading(false);
