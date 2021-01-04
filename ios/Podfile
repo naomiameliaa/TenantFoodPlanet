@@ -8,11 +8,8 @@ target 'tenantAdmin' do
 
   use_react_native!(:path => config["reactNativePath"])
 
-<<<<<<< HEAD
   pod 'react-native-image-picker', :path => '../node_modules/react-native-image-picker'
-=======
   pod 'RNFirebase', :path => '../node_modules/react-native-firebase'
->>>>>>> ee2646d5b226d9c5f0ea304100bf2efe77f50ccb
 
   target 'tenantAdminTests' do
     inherit! :complete
