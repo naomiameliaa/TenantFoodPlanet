@@ -89,7 +89,8 @@ const styles = StyleSheet.create({
   },
 });
 
-function AddMenu({navigation}) {
+function AddMenu({navigation, route}) {
+  const {getMenuData} = route.params;
   const [menuName, onChangeMenuName] = React.useState('');
   const [menuDescription, onChangeMenuDescription] = React.useState('');
   const [menuPrice, onChangeMenuPrice] = React.useState('');
@@ -98,7 +99,7 @@ function AddMenu({navigation}) {
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
-    if (getDataTenantAdmin !== null) {
+    if (dataTenantAdmin) {
       return dataTenantAdmin.tenantId;
     } else {
       return null;
@@ -124,7 +125,10 @@ function AddMenu({navigation}) {
           titleMessage: 'Success',
           bodyMessage: 'Success add new menu',
           btnText: 'OK',
-          onPressOK: () => navigation.goBack(),
+          onPressOK: () => {
+            getMenuData();
+            navigation.goBack();
+          },
           btnCancel: false,
         });
       }

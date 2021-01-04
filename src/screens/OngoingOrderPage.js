@@ -14,8 +14,9 @@ import axios from 'axios';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
+import {getData, normalize, alertMessage, removeData} from '../utils';
+import {AuthContext} from '../../context';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -111,38 +112,15 @@ const styles = StyleSheet.create({
 function OngoingOrder({navigation}) {
   const [orderData, setOrderData] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isLoadingPickedUp, setIsLoadingPickedUp] = React.useState(false);
-  const [isLoadingReady, setIsLoadingReady] = React.useState(false);
+  const {signOut} = React.useContext(AuthContext);
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
-    if (getDataTenantAdmin !== null) {
+    if (dataTenantAdmin) {
       return dataTenantAdmin.tenantId;
     } else {
       return null;
     }
-  };
-
-  const renderPrice = (price) => {
-    let i;
-    let tempPrice = '';
-    let ctr = 0;
-    let stringPrice = price.toString();
-    for (i = stringPrice.length - 1; i >= 0; i--) {
-      tempPrice += stringPrice[i];
-      ctr++;
-      if (ctr === 3) {
-        if (i > 1) {
-          tempPrice += '.';
-          ctr = 0;
-        }
-      }
-    }
-    let resPrice = '';
-    for (i = tempPrice.length - 1; i >= 0; i--) {
-      resPrice += tempPrice[i];
-    }
-    return resPrice;
   };
 
   const renderItem = ({item, idx}) => {
@@ -166,7 +144,6 @@ function OngoingOrder({navigation}) {
             wrapperStyle={styles.notifyBtn}
             txtStyle={styles.btnText}
             onPress={() => setStatusReady(item.orderId)}
-            isLoadingReady
           />
         </View>
         {item.detail.map((itm, key) => {
@@ -190,11 +167,49 @@ function OngoingOrder({navigation}) {
           wrapperStyle={styles.pickedUpBtn}
           txtStyle={styles.btnText}
           onPress={() => setStatusPickedUp(item.orderId)}
-          isLoadingPickedUp
         />
       </TouchableOpacity>
     );
   };
+
+  const signOutTenant = async () => {
+    const removeLocalData = await removeData('tenantAdminData');
+    if (removeLocalData) {
+      signOut();
+    }
+  };
+
+  async function logout() {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        'https://food-planet.herokuapp.com/users/logout',
+      );
+      if (response.data.object === 'Logout success') {
+        signOutTenant();
+      }
+    } catch (error) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Please try again later',
+        btnText: 'Try Again',
+        btnCancel: false,
+      });
+    }
+    setIsLoading(false);
+  }
+
+  function sessionTimedOut() {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
 
   async function getOngoingOrder() {
     setIsLoading(true);
@@ -202,35 +217,24 @@ function OngoingOrder({navigation}) {
     try {
       const response = await axios.get(
         `https://food-planet.herokuapp.com/orders/tenant?tenantId=${tenantId}&status=PROCESSING&status=READY`,
-        {
-          auth: {
-            username: 'tenantAdmin@mail.com',
-            password: 'password',
-          },
-        },
       );
-      console.log(response.data, 'ini response');
       if (response.data.msg === 'Query success') {
         setOrderData(response.data.object);
       }
     } catch (error) {
       console.log(error);
+      if (error.response.status === 401) {
+        sessionTimedOut();
+      }
     }
     setIsLoading(false);
   }
 
   async function setStatusReady(orderId) {
-    setIsLoadingReady(true);
     const tenantId = await getDataTenantAdmin();
     try {
       const response = await axios.post(
         `https://food-planet.herokuapp.com/orders/setFoodReady?orderId=${orderId}&tenantId=${tenantId}`,
-        {
-          auth: {
-            username: 'tenantAdmin@mail.com',
-            password: 'password',
-          },
-        },
       );
       if (response.data.msg === 'Query success') {
         alertMessage({
@@ -249,21 +253,13 @@ function OngoingOrder({navigation}) {
         btnCancel: true,
       });
     }
-    setIsLoadingReady(false);
   }
 
   async function setStatusPickedUp(orderId) {
-    setIsLoadingPickedUp(true);
     const tenantId = await getDataTenantAdmin();
     try {
       const response = await axios.post(
         `https://food-planet.herokuapp.com/orders/setOrderPickedUp?orderId=${orderId}&tenantId=${tenantId}`,
-        {
-          auth: {
-            username: 'tenantAdmin@mail.com',
-            password: 'password',
-          },
-        },
       );
       if (response.data.msg === 'Query success') {
         alertMessage({
@@ -282,7 +278,6 @@ function OngoingOrder({navigation}) {
         btnCancel: true,
       });
     }
-    setIsLoadingPickedUp(false);
   }
 
   React.useEffect(() => {

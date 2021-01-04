@@ -83,7 +83,7 @@ function ChangePassword({navigation}) {
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
-    if (getDataTenantAdmin !== null) {
+    if (dataTenantAdmin) {
       return dataTenantAdmin.userId;
     } else {
       return null;
@@ -108,7 +108,7 @@ function ChangePassword({navigation}) {
     try {
       const userId = await getDataTenantAdmin();
       const response = await axios.post(
-        `http://food-planet.herokuapp.com/users/changePassword?userId=${userId}&oldPassword=${oldPassword}&newPassword=${confirmPassword}`,
+        `https://food-planet.herokuapp.com/users/changePassword?userId=${userId}&oldPassword=${oldPassword}&newPassword=${confirmPassword}`,
       );
       if (response.data.msg === 'Change password success') {
         alertMessage({

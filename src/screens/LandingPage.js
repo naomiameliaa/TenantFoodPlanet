@@ -75,7 +75,6 @@ function LandingPage({navigation}) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [email, onChangeEmail] = React.useState('');
   const [password, onChangePassword] = React.useState('');
-  const [errorMessage, setErrorMessage] = React.useState('');
 
   const validationLogin = () => {
     if (email.length === 0 || password.length === 0) {
@@ -93,11 +92,8 @@ function LandingPage({navigation}) {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        'https://food-planet.herokuapp.com/users/login',
+        'https://food-planet.herokuapp.com/users/login?role=tenant',
         {
-          params: {
-            role: 'tenant',
-          },
           auth: {
             username: email.toLowerCase(),
             password: password,
@@ -115,7 +111,6 @@ function LandingPage({navigation}) {
         btnText: 'Try Again',
         btnCancel: false,
       });
-      setErrorMessage('Something went wrong');
       console.log('error:', error);
     }
     setIsLoading(false);

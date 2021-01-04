@@ -6,18 +6,16 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Dimensions,
+  FlatList,
 } from 'react-native';
 import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
-import {FlatList} from 'react-native-gesture-handler';
-
-const {width: SCREEN_WIDTH} = Dimensions.get('window');
+import {getData, normalize, alertMessage, removeData} from '../utils';
+import {AuthContext} from '../../context';
 
 const styles = StyleSheet.create({
   container: {
@@ -93,15 +91,55 @@ const styles = StyleSheet.create({
 function ManageMenu({navigation}) {
   const [menuData, setMenuData] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const {signOut} = React.useContext(AuthContext);
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
-    if (getDataTenantAdmin !== null) {
+    if (dataTenantAdmin) {
       return dataTenantAdmin.tenantId;
     } else {
       return null;
     }
   };
+
+  const signOutTenant = async () => {
+    const removeLocalData = await removeData('tenantAdminData');
+    if (removeLocalData) {
+      signOut();
+    }
+  };
+
+  async function logout() {
+    setIsLoading(true);
+    try {
+      const response = await axios.post(
+        'https://food-planet.herokuapp.com/users/logout',
+      );
+      if (response.data.object === 'Logout success') {
+        signOutTenant();
+      }
+    } catch (error) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Please try again later',
+        btnText: 'Try Again',
+        btnCancel: false,
+      });
+    }
+    setIsLoading(false);
+  }
+
+  function sessionTimedOut() {
+    alertMessage({
+      titleMessage: 'Session Timeout',
+      bodyMessage: 'Please re-login',
+      btnText: 'OK',
+      onPressOK: () => {
+        logout();
+      },
+      btnCancel: false,
+    });
+  }
 
   async function getMenuData() {
     setIsLoading(true);
@@ -113,10 +151,6 @@ function ManageMenu({navigation}) {
           params: {
             tenantId: tenantId,
           },
-          auth: {
-            username: 'tenantAdmin@mail.com',
-            password: 'password',
-          },
         },
       );
       if (response.data.msg === 'Query success') {
@@ -124,6 +158,9 @@ function ManageMenu({navigation}) {
       }
     } catch (error) {
       console.log(error);
+      if (error.response.status === 401) {
+        sessionTimedOut();
+      }
     }
     setIsLoading(false);
   }
@@ -165,7 +202,7 @@ function ManageMenu({navigation}) {
       btnText: 'No',
       secondBtnText: 'Yes',
       secondOnPressOK: () => deleteMenu(menuId),
-      btnCancel: true,
+      btnCancel: false,
     });
   }
 
@@ -205,6 +242,7 @@ function ManageMenu({navigation}) {
                 menuDescription: item.description,
                 menuPrice: item.price,
                 menuImage: item.image,
+                getMenuData: getMenuData,
               });
             }}
           />
@@ -233,7 +271,9 @@ function ManageMenu({navigation}) {
             txtStyle={styles.btnText}
             wrapperStyle={styles.btnWrapper}
             onPress={() => {
-              navigation.navigate('Add Menu');
+              navigation.navigate('Add Menu', {
+                getMenuData: getMenuData,
+              });
             }}
           />
         </View>

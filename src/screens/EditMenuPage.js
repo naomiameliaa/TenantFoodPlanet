@@ -72,7 +72,6 @@ const styles = StyleSheet.create({
     height: 220,
     borderColor: 'black',
     borderWidth: 0.5,
-    borderRadius: 20,
   },
   btnText: {
     color: theme.colors.white,
@@ -96,6 +95,7 @@ function EditMenu({navigation, route}) {
     menuDescription,
     menuPrice,
     menuImage,
+    getMenuData,
   } = route.params;
   const [menu_name, onChangeMenuName] = React.useState(menuName);
   const [menu_description, onChangeMenuDescription] = React.useState(
@@ -123,7 +123,10 @@ function EditMenu({navigation, route}) {
           titleMessage: 'Success',
           bodyMessage: 'Success update menu',
           btnText: 'OK',
-          onPressOK: () => navigation.goBack(),
+          onPressOK: () => {
+            getMenuData();
+            navigation.goBack();
+          },
           btnCancel: false,
         });
       }
