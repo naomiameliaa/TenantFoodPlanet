@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 25,
     textAlign: 'center',
+    color: theme.colors.red,
   },
   orderContainer: {
     backgroundColor: theme.colors.white,
@@ -61,6 +62,7 @@ const styles = StyleSheet.create({
   boldStyle: {
     fontSize: normalize(14),
     fontWeight: 'bold',
+    color: theme.colors.red,
   },
   titleWrapper: {
     flexDirection: 'row',

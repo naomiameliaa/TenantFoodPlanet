@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import Title from '../components/Title';
 import {normalize} from '../utils';
+import theme from '../theme';
 
 const styles = StyleSheet.create({
   container: {
@@ -22,6 +23,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 25,
     textAlign: 'center',
+    color: theme.colors.red,
   },
   horizontalWrapper: {
     flexDirection: 'row',
@@ -32,12 +34,15 @@ const styles = StyleSheet.create({
   },
   qtyStyle: {
     width: '12%',
+    fontWeight: 'bold',
   },
   menuName: {
-    width: '65%',
+    width: '70%',
+    fontWeight: 'bold',
   },
   priceStyle: {
     width: '35%',
+    fontWeight: 'bold',
   },
   txtStyle: {
     fontWeight: 'bold',
@@ -73,8 +78,6 @@ function OrderDetail({route}) {
       return 'Processing';
     } else if (state === 'READY') {
       return 'Ready';
-    } else if (state === 'PICKED_UP') {
-      return 'Picked Up';
     } else {
       return 'Finished';
     }

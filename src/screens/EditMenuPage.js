@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 25,
     textAlign: 'center',
+    color: theme.colors.red,
   },
   contentContainer: {
     justifyContent: 'center',

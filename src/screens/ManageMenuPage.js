@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: normalize(25),
     margin: 10,
+    color: theme.colors.red,
   },
   btnText: {
     color: theme.colors.white,

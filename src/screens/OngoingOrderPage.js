@@ -35,6 +35,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     marginBottom: 25,
     textAlign: 'center',
+    color: theme.colors.red,
   },
   orderContainer: {
     backgroundColor: theme.colors.white,
@@ -62,6 +63,7 @@ const styles = StyleSheet.create({
   orderNum: {
     fontSize: normalize(14),
     fontWeight: 'bold',
+    color: theme.colors.red,
   },
   orderNumBtnWrapper: {
     flexDirection: 'row',
@@ -166,7 +168,7 @@ function OngoingOrder({navigation}) {
           title="Picked up"
           wrapperStyle={styles.pickedUpBtn}
           txtStyle={styles.btnText}
-          onPress={() => setStatusPickedUp(item.orderId)}
+          onPress={() => doPickedUp(item.orderId)}
         />
       </TouchableOpacity>
     );
@@ -240,6 +242,11 @@ function OngoingOrder({navigation}) {
       }
     }
   }
+
+  const doPickedUp = (orderId) => {
+    setStatusPickedUp(orderId);
+    getOngoingOrder();
+  };
 
   async function setStatusPickedUp(orderId) {
     const tenantId = await getDataTenantAdmin();

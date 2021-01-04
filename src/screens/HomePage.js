@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {View, SafeAreaView, Image, StyleSheet} from 'react-native';
 import axios from 'axios';
-import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
@@ -15,19 +14,16 @@ const styles = StyleSheet.create({
   innerContainer: {
     padding: normalize(20),
   },
-  soundBtn: {
-    width: 40,
-    height: 40,
-  },
   logoutTxt: {
     color: theme.colors.red,
     fontWeight: 'bold',
     fontSize: 22,
+    alignSelf: 'flex-end',
   },
   titleStyle: {
     fontSize: normalize(20),
     textAlign: 'center',
-    marginTop: normalize(10),
+    marginTop: normalize(20),
     marginBottom: normalize(40),
   },
   horizontalWrapper: {
@@ -59,7 +55,6 @@ const styles = StyleSheet.create({
 
 function HomePage({navigation}) {
   const [isLoadingLogout, setisLoadingLogout] = React.useState(false);
-  const [isSoundOn, setIsSoundOn] = React.useState(true);
   const {signOut} = React.useContext(AuthContext);
   const [tenantName, setTenantName] = React.useState('');
 
@@ -110,28 +105,13 @@ function HomePage({navigation}) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.innerContainer}>
-        <View style={styles.horizontalWrapper}>
-          {isSoundOn ? (
-            <ButtonKit
-              source={require('../assets/alarm-on.png')}
-              wrapperStyle={styles.soundBtn}
-              onPress={() => setIsSoundOn(false)}
-            />
-          ) : (
-            <ButtonKit
-              source={require('../assets/alarm-off.png')}
-              wrapperStyle={styles.soundBtn}
-              onPress={() => setIsSoundOn(true)}
-            />
-          )}
-          <ButtonText
-            title="Log out"
-            txtStyle={styles.logoutTxt}
-            onPress={() => logout()}
-            isLoading={isLoadingLogout}
-            colorSpinner={theme.colors.red}
-          />
-        </View>
+        <ButtonText
+          title="Log out"
+          txtStyle={styles.logoutTxt}
+          onPress={() => logout()}
+          isLoading={isLoadingLogout}
+          colorSpinner={theme.colors.red}
+        />
         <Title text={`Welcome, ${tenantName}!`} txtStyle={styles.titleStyle} />
         <View style={styles.horizontalWrapper}>
           <View style={styles.iconWrapper}>
