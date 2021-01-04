@@ -58,7 +58,6 @@ const styles = StyleSheet.create({
 });
 
 function HomePage({navigation}) {
-  const [isLoading, setIsLoading] = React.useState(false);
   const [isLoadingLogout, setisLoadingLogout] = React.useState(false);
   const [isSoundOn, setIsSoundOn] = React.useState(true);
   const {signOut} = React.useContext(AuthContext);

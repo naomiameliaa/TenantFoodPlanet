@@ -14,7 +14,7 @@ import Title from '../components/Title';
 import theme from '../theme';
 import {normalize, getData, alertMessage, removeData} from '../utils';
 import ImagePicker from 'react-native-image-picker';
-import {AuthContext} from "../../context";
+import {AuthContext} from '../../context';
 
 const styles = StyleSheet.create({
   container: {
@@ -90,7 +90,8 @@ const styles = StyleSheet.create({
   },
 });
 
-function AddMenu({navigation}) {
+function AddMenu({navigation, route}) {
+  const {getMenuData} = route.params;
   const [menuName, onChangeMenuName] = React.useState('');
   const [menuDescription, onChangeMenuDescription] = React.useState('');
   const [menuPrice, onChangeMenuPrice] = React.useState('');
@@ -100,7 +101,7 @@ function AddMenu({navigation}) {
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
-    if (getDataTenantAdmin !== null) {
+    if (dataTenantAdmin) {
       return dataTenantAdmin.tenantId;
     } else {
       return null;
@@ -115,7 +116,7 @@ function AddMenu({navigation}) {
     }
   };
 
-  function sessionTimedOut () {
+  function sessionTimedOut() {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -146,14 +147,17 @@ function AddMenu({navigation}) {
           titleMessage: 'Success',
           bodyMessage: 'Success add new menu',
           btnText: 'OK',
-          onPressOK: () => navigation.goBack(),
+          onPressOK: () => {
+            getMenuData();
+            navigation.goBack();
+          },
           btnCancel: false,
         });
       }
     } catch (error) {
-      if(error.response.status === 401) {
-          sessionTimedOut();
-      }else {
+      if (error.response.status === 401) {
+        sessionTimedOut();
+      } else {
         alertMessage({
           titleMessage: 'Error',
           bodyMessage: 'Add new menu failed, please try again!',

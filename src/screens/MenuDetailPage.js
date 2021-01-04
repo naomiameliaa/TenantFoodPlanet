@@ -1,12 +1,5 @@
 import * as React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  SafeAreaView,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
+import {View, Text, Image, SafeAreaView, StyleSheet} from 'react-native';
 import theme from '../theme';
 import {normalize} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';

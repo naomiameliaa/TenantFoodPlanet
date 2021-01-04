@@ -6,19 +6,23 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Dimensions,
+  FlatList,
 } from 'react-native';
 import axios from 'axios';
 import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage, removeData} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
+<<<<<<< HEAD
 import {FlatList} from 'react-native-gesture-handler';
 import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
+=======
+import {getData, normalize, alertMessage, removeData} from '../utils';
+import {AuthContext} from '../../context';
+>>>>>>> 36a090d0b8fc4367b24cd9a965cea8dd9550eae8
 
 const styles = StyleSheet.create({
   container: {
@@ -98,7 +102,7 @@ function ManageMenu({navigation}) {
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
-    if (getDataTenantAdmin !== null) {
+    if (dataTenantAdmin) {
       return dataTenantAdmin.tenantId;
     } else {
       return null;
@@ -141,8 +145,10 @@ function ManageMenu({navigation}) {
         setMenuData(response.data.object);
       }
     } catch (error) {
-      sessionTimedOut();
-      console.log(error.response);
+      console.log(error);
+      if (error.response.status === 401) {
+        sessionTimedOut();
+      }
     }
     setIsLoading(false);
   }
@@ -188,7 +194,7 @@ function ManageMenu({navigation}) {
       btnText: 'No',
       secondBtnText: 'Yes',
       secondOnPressOK: () => deleteMenu(menuId),
-      btnCancel: true,
+      btnCancel: false,
     });
   }
 
@@ -228,6 +234,7 @@ function ManageMenu({navigation}) {
                 menuDescription: item.description,
                 menuPrice: item.price,
                 menuImage: item.image,
+                getMenuData: getMenuData,
               });
             }}
           />
@@ -256,7 +263,9 @@ function ManageMenu({navigation}) {
             txtStyle={styles.btnText}
             wrapperStyle={styles.btnWrapper}
             onPress={() => {
-              navigation.navigate('Add Menu');
+              navigation.navigate('Add Menu', {
+                getMenuData: getMenuData,
+              });
             }}
           />
         </View>

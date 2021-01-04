@@ -13,7 +13,7 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {alertMessage, getData, removeData} from '../utils';
-import {AuthContext} from "../../context";
+import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -107,7 +107,7 @@ function ForgotPassword({navigation}) {
     }
   };
 
-  function sessionTimedOut () {
+  function sessionTimedOut() {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -135,9 +135,9 @@ function ForgotPassword({navigation}) {
         });
       }
     } catch (error) {
-      if(error.response.status === 401) {
+      if (error.response.status === 401) {
         sessionTimedOut();
-      }else {
+      } else {
         console.log(error);
         alertMessage({
           titleMessage: 'Failed',

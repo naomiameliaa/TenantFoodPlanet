@@ -12,7 +12,7 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {normalize, getData, alertMessage, removeData} from '../utils';
-import {AuthContext} from "../../context";
+import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -85,7 +85,7 @@ function ChangePassword({navigation}) {
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
-    if (getDataTenantAdmin !== null) {
+    if (dataTenantAdmin) {
       return dataTenantAdmin.userId;
     } else {
       return null;
@@ -113,7 +113,7 @@ function ChangePassword({navigation}) {
     }
   };
 
-  function sessionTimedOut () {
+  function sessionTimedOut() {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -130,7 +130,7 @@ function ChangePassword({navigation}) {
     try {
       const userId = await getDataTenantAdmin();
       const response = await axios.post(
-        `http://food-planet.herokuapp.com/users/changePassword?userId=${userId}&oldPassword=${oldPassword}&newPassword=${confirmPassword}`,
+        `https://food-planet.herokuapp.com/users/changePassword?userId=${userId}&oldPassword=${oldPassword}&newPassword=${confirmPassword}`,
       );
       if (response.data.msg === 'Change password success') {
         alertMessage({
@@ -142,9 +142,9 @@ function ChangePassword({navigation}) {
         });
       }
     } catch (error) {
-      if(error.response.status === 401) {
+      if (error.response.status === 401) {
         sessionTimedOut();
-      }else {
+      } else {
         alertMessage({
           titleMessage: 'Failed',
           bodyMessage: 'Please try again later',

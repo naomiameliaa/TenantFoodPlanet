@@ -14,7 +14,7 @@ import Title from '../components/Title';
 import theme from '../theme';
 import {normalize, alertMessage, getData, removeData} from '../utils';
 import ImagePicker from 'react-native-image-picker';
-import {AuthContext} from "../../context";
+import {AuthContext} from '../../context';
 
 const styles = StyleSheet.create({
   container: {
@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
     height: 220,
     borderColor: 'black',
     borderWidth: 0.5,
-    borderRadius: 20,
   },
   btnText: {
     color: theme.colors.white,
@@ -97,6 +96,7 @@ function EditMenu({navigation, route}) {
     menuDescription,
     menuPrice,
     menuImage,
+    getMenuData,
   } = route.params;
   const [menu_name, onChangeMenuName] = React.useState(menuName);
   const [menu_description, onChangeMenuDescription] = React.useState(
@@ -115,7 +115,7 @@ function EditMenu({navigation, route}) {
     }
   };
 
-  function sessionTimedOut () {
+  function sessionTimedOut() {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -145,14 +145,17 @@ function EditMenu({navigation, route}) {
           titleMessage: 'Success',
           bodyMessage: 'Success update menu',
           btnText: 'OK',
-          onPressOK: () => navigation.goBack(),
+          onPressOK: () => {
+            getMenuData();
+            navigation.goBack();
+          },
           btnCancel: false,
         });
       }
     } catch (error) {
-      if(error.response.status === 401) {
+      if (error.response.status === 401) {
         sessionTimedOut();
-      }else {
+      } else {
         alertMessage({
           titleMessage: 'Error',
           bodyMessage: 'Update menu failed',

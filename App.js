@@ -110,7 +110,7 @@ function App() {
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
-    if (dataTenantAdmin !== null) {
+    if (dataTenantAdmin) {
       setTenantAdminData(dataTenantAdmin);
     } else {
       setTenantAdminData(null);

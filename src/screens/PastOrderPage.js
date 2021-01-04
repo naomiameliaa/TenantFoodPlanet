@@ -11,12 +11,11 @@ import {
   Dimensions,
 } from 'react-native';
 import axios from 'axios';
-import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage, removeData} from '../utils';
 import SpinnerKit from '../components/SpinnerKit';
-import {AuthContext} from "../../context";
+import {getData, normalize, alertMessage, removeData} from '../utils';
+import {AuthContext} from '../../context';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 
@@ -97,7 +96,7 @@ function PastOrder({navigation}) {
 
   const getDataTenantAdmin = async () => {
     const dataTenantAdmin = await getData('tenantAdminData');
-    if (getDataTenantAdmin !== null) {
+    if (dataTenantAdmin) {
       return dataTenantAdmin.tenantId;
     } else {
       return null;
@@ -172,7 +171,7 @@ function PastOrder({navigation}) {
     }
   };
 
-  function sessionTimedOut () {
+  function sessionTimedOut() {
     alertMessage({
       titleMessage: 'Session Timeout',
       bodyMessage: 'Please re-login',
@@ -197,6 +196,9 @@ function PastOrder({navigation}) {
     } catch (error) {
       sessionTimedOut();
       console.log(error);
+      if (error.response.status === 401) {
+        sessionTimedOut();
+      }
     }
     setIsLoading(false);
   }
