@@ -149,9 +149,9 @@ function ChangePassword({navigation}) {
       if (response.data.msg === 'Change password success') {
         alertMessage({
           titleMessage: 'Success',
-          bodyMessage: 'Password changed successfully',
+          bodyMessage: 'Password changed successfully, Please re-login!',
           btnText: 'OK',
-          onPressOK: () => navigation.goBack(),
+          onPressOK: () => logout(),
           btnCancel: false,
         });
       }

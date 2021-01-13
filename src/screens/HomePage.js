@@ -20,8 +20,8 @@ const styles = StyleSheet.create({
     fontSize: normalize(18),
   },
   logoutWrapper: {
-    width: 90,
     alignSelf: 'flex-end',
+    marginBottom: 10,
   },
   titleStyle: {
     fontSize: normalize(20),

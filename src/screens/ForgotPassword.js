@@ -191,7 +191,11 @@ function ForgotPassword({navigation}) {
         </Text>
         <View style={styles.inputContainer}>
           <TextInput
-            style={styles.inputStyle}
+            style={
+              email.length === 0 || !validateEmail
+                ? styles.inputStyleError
+                : styles.inputStyle
+            }
             onChangeText={(text) => onChangeEmail(text)}
             value={email}
             textContentType="emailAddress"

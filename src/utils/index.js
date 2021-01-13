@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import axios from 'axios';
 
-const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 // based on iphone 5s's scale
 const scale = SCREEN_WIDTH / 320;
@@ -77,13 +77,14 @@ export const alertMessage = ({
 
 export const saveFcmToken = async () => {
   const fcmToken = await messaging().getToken();
-  const dataUser = await getData("tenantAdminData");
+  const dataUser = await getData('tenantAdminData');
 
   if (fcmToken && dataUser) {
     const userId = dataUser.userId;
     try {
+      // eslint-disable-next-line no-unused-vars
       const response = await axios.post(
-      `https://food-planet.herokuapp.com/users/saveNotificationToken?userId=${userId}&token=${fcmToken}`,
+        `https://food-planet.herokuapp.com/users/saveNotificationToken?userId=${userId}&token=${fcmToken}`,
       );
     } catch (error) {
       console.log(error.response);
