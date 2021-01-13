@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
   },
   logoutWrapper: {
     alignSelf: 'flex-end',
-    marginBottom: 10,
+    width: 90,
   },
   titleStyle: {
     fontSize: normalize(20),
