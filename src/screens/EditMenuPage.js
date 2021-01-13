@@ -30,6 +30,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: theme.colors.red,
   },
+  contentWrapper: {
+    marginBottom: normalize(60),
+  },
   contentContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -37,23 +40,49 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     width: '100%',
-    height: 40,
+    height: normalize(42),
     borderRadius: 10,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
-    marginVertical: 8,
+    paddingVertical: 'auto',
+    marginVertical: 10,
     justifyContent: 'center',
+  },
+  inputStyleError: {
+    width: '100%',
+    height: normalize(42),
+    borderRadius: 10,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 'auto',
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   textArea: {
     width: '100%',
-    height: 120,
+    height: normalize(120),
     borderRadius: 10,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
     marginVertical: 8,
     textAlignVertical: 'top',
+  },
+  textAreaError: {
+    width: '100%',
+    height: normalize(120),
+    borderRadius: 10,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    marginVertical: 8,
+    textAlignVertical: 'top',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   btnImage: {
     alignSelf: 'flex-end',
@@ -85,7 +114,8 @@ const styles = StyleSheet.create({
     width: '50%',
     borderRadius: 10,
     paddingVertical: 8,
-    marginVertical: 5,
+    marginTop: 5,
+    marginBottom: 30,
     alignSelf: 'center',
   },
 });
@@ -108,6 +138,23 @@ function EditMenu({navigation, route}) {
   const [isLoading, setIsLoading] = React.useState(false);
   const {signOut} = React.useContext(AuthContext);
 
+  function checkData() {
+    if (
+      menu_name.length === 0 ||
+      menu_description.length === 0 ||
+      menu_price.length === 0 ||
+      fileData.length === 0
+    ) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'All data must be filled!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else {
+      editMenu();
+    }
+  }
   const logout = async () => {
     const dataUser = await getData('tenantAdminData');
     if (dataUser !== null) {
@@ -221,7 +268,9 @@ function EditMenu({navigation, route}) {
     <SafeAreaView style={styles.container}>
       <View style={styles.innerContainer}>
         <Title text="Edit Menu" txtStyle={styles.titleText} />
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={styles.contentWrapper}
+          showsVerticalScrollIndicator={false}>
           {renderFileData()}
           <ButtonKit
             source={require('../assets/photo.png')}
@@ -230,32 +279,46 @@ function EditMenu({navigation, route}) {
           />
           <View style={styles.contentContainer}>
             <TextInput
-              style={styles.inputStyle}
+              style={
+                menu_name.length === 0
+                  ? styles.inputStyleError
+                  : styles.inputStyle
+              }
               onChangeText={(text) => onChangeMenuName(text)}
               value={menu_name}
               autoCapitalize="none"
               placeholder="Menu Name"
             />
             <TextInput
-              style={styles.textArea}
+              style={
+                menu_description.length === 0
+                  ? styles.textAreaError
+                  : styles.textArea
+              }
               onChangeText={(text) => onChangeMenuDescription(text)}
               value={menu_description}
               autoCapitalize="none"
               placeholder="Menu Description"
+              multiline
             />
             <TextInput
-              style={styles.inputStyle}
+              style={
+                menu_price.length === 0
+                  ? styles.inputStyleError
+                  : styles.inputStyle
+              }
               onChangeText={(text) => onChangeMenuPrice(text)}
               value={menu_price.toString()}
               autoCapitalize="none"
               placeholder="Menu Price"
+              keyboardType="number-pad"
             />
           </View>
           <ButtonText
             title="Save"
             txtStyle={styles.btnText}
             wrapperStyle={styles.btnWrapper}
-            onPress={editMenu}
+            onPress={() => checkData()}
             isLoading={isLoading}
           />
         </ScrollView>

@@ -39,13 +39,27 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     width: '90%',
-    height: normalize(40),
+    height: normalize(42),
     borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
+  },
+  inputStyleError: {
+    width: '90%',
+    height: normalize(42),
+    borderRadius: 20,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 'auto',
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   forgotPassword: {
     color: theme.colors.red,
@@ -84,9 +98,22 @@ function LandingPage({navigation}) {
         btnText: 'Try Again',
         btnCancel: false,
       });
+    } else if (!validateEmail) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Email is invalid!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else {
+      login();
     }
-    login();
   };
+
+  function validateEmail() {
+    var regExp = /\S+@\S+\.\S+/;
+    return regExp.test(email);
+  }
 
   async function login() {
     setIsLoading(true);
@@ -125,7 +152,11 @@ function LandingPage({navigation}) {
           <Title txtStyle={styles.txtTitle} text="Login to your account" />
           <View style={styles.inputContainer}>
             <TextInput
-              style={styles.inputStyle}
+              style={
+                !validateEmail || email.length === 0
+                  ? styles.inputStyleError
+                  : styles.inputStyle
+              }
               onChangeText={(text) => onChangeEmail(text)}
               value={email}
               textContentType="emailAddress"
@@ -134,7 +165,11 @@ function LandingPage({navigation}) {
               placeholder="Tenant Email"
             />
             <TextInput
-              style={styles.inputStyle}
+              style={
+                password.length === 0
+                  ? styles.inputStyleError
+                  : styles.inputStyle
+              }
               onChangeText={(text) => onChangePassword(text)}
               value={password}
               textContentType="password"
@@ -153,7 +188,7 @@ function LandingPage({navigation}) {
               title="LOGIN"
               txtStyle={styles.loginTxt}
               wrapperStyle={styles.loginWrapper}
-              onPress={validationLogin}
+              onPress={() => validationLogin()}
               isLoading={isLoading}
             />
           </View>

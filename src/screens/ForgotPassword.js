@@ -12,7 +12,7 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {alertMessage, getData, removeData} from '../utils';
+import {alertMessage, getData, removeData, normalize} from '../utils';
 import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
@@ -38,13 +38,27 @@ const styles = StyleSheet.create({
   },
   inputStyle: {
     width: '90%',
-    height: 40,
+    height: normalize(42),
     borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
+  },
+  inputStyleError: {
+    width: '90%',
+    height: normalize(42),
+    borderRadius: 20,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 'auto',
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   content: {
     width: SCREEN_WIDTH * 0.8,
@@ -86,17 +100,29 @@ function ForgotPassword({navigation}) {
   const [isLoading, setIsLoading] = React.useState(false);
   const {signOut} = React.useContext(AuthContext);
 
-  function validationEmail() {
-    if (email === '') {
+  function checkInput() {
+    if (email.length === 0) {
       alertMessage({
         titleMessage: 'Error',
-        bodyMessage: 'Email field is required',
-        btnText: 'OK',
+        bodyMessage: 'Email field is required!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else if (!validateEmail) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Email is invalid!',
+        btnText: 'Try Again',
         btnCancel: true,
       });
     } else {
       sendEmail();
     }
+  }
+
+  function validateEmail() {
+    var regExp = /\S+@\S+\.\S+/;
+    return regExp.test(email);
   }
 
   const logout = async () => {
@@ -176,7 +202,7 @@ function ForgotPassword({navigation}) {
             title="Send"
             txtStyle={styles.sendTxt}
             wrapperStyle={styles.sendWrapper}
-            onPress={validationEmail}
+            onPress={() => checkInput()}
             isLoading={isLoading}
           />
         </View>

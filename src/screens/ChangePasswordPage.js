@@ -33,15 +33,29 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: theme.colors.red,
   },
-  txtInput: {
+  inputStyle: {
     width: '90%',
-    height: 40,
-    borderRadius: 10,
+    height: normalize(42),
+    borderRadius: 20,
     backgroundColor: theme.colors.white,
-    fontSize: 18,
+    fontSize: 16,
     paddingHorizontal: 20,
+    paddingVertical: 'auto',
     marginVertical: 10,
     justifyContent: 'center',
+  },
+  inputStyleError: {
+    width: '90%',
+    height: normalize(42),
+    borderRadius: 20,
+    backgroundColor: theme.colors.white,
+    fontSize: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 'auto',
+    marginVertical: 10,
+    justifyContent: 'center',
+    borderColor: theme.colors.red,
+    borderWidth: 1,
   },
   btnText: {
     color: theme.colors.white,
@@ -51,22 +65,10 @@ const styles = StyleSheet.create({
   btnWrapper: {
     backgroundColor: theme.colors.red,
     width: '50%',
-    borderRadius: 10,
+    borderRadius: 20,
     paddingVertical: 8,
     marginVertical: 5,
     alignSelf: 'center',
-  },
-  inputStyleError: {
-    width: '90%',
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: theme.colors.white,
-    fontSize: 18,
-    paddingHorizontal: 20,
-    marginVertical: 10,
-    justifyContent: 'center',
-    borderColor: theme.colors.red,
-    borderWidth: 1,
   },
   content: {
     width: SCREEN_WIDTH * 0.8,
@@ -94,7 +96,18 @@ function ChangePassword({navigation}) {
   };
 
   function validationPassword() {
-    if (confirmPassword !== password) {
+    if (
+      oldPassword.length === 0 ||
+      password.length === 0 ||
+      confirmPassword === 0
+    ) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'All fields are required!',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
+    } else if (confirmPassword !== password) {
       alertMessage({
         titleMessage: 'Error',
         bodyMessage: 'Password does not match',
@@ -165,7 +178,11 @@ function ChangePassword({navigation}) {
           Please enter your old password and then your new password.
         </Text>
         <TextInput
-          style={styles.txtInput}
+          style={
+            oldPassword.length === 0
+              ? styles.inputStyleError
+              : styles.inputStyle
+          }
           onChangeText={(text) => onChangeOldPassword(text)}
           value={oldPassword}
           textContentType="password"
@@ -175,9 +192,9 @@ function ChangePassword({navigation}) {
         />
         <TextInput
           style={
-            confirmPassword !== password
+            confirmPassword !== password || password.length === 0
               ? styles.inputStyleError
-              : styles.txtInput
+              : styles.inputStyle
           }
           onChangeText={(text) => onChangePassword(text)}
           value={password}
@@ -188,9 +205,9 @@ function ChangePassword({navigation}) {
         />
         <TextInput
           style={
-            confirmPassword !== password
+            confirmPassword !== password || confirmPassword.length === 0
               ? styles.inputStyleError
-              : styles.txtInput
+              : styles.inputStyle
           }
           onChangeText={(text) => onChangeConfirmPassword(text)}
           value={confirmPassword}

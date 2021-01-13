@@ -17,7 +17,10 @@ const styles = StyleSheet.create({
   logoutTxt: {
     color: theme.colors.red,
     fontWeight: 'bold',
-    fontSize: 22,
+    fontSize: normalize(18),
+  },
+  logoutWrapper: {
+    width: 90,
     alignSelf: 'flex-end',
   },
   titleStyle: {
@@ -41,8 +44,9 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: theme.colors.white,
-    fontSize: 15,
+    fontSize: normalize(14),
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   btnWrapper: {
     backgroundColor: theme.colors.red,
@@ -109,6 +113,7 @@ function HomePage({navigation}) {
           title="Log out"
           txtStyle={styles.logoutTxt}
           onPress={() => logout()}
+          wrapperStyle={styles.logoutWrapper}
           isLoading={isLoadingLogout}
           colorSpinner={theme.colors.red}
         />
