@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Dimensions,
+  RefreshControl,
 } from 'react-native';
 import axios from 'axios';
 import Title from '../components/Title';
@@ -59,6 +60,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginVertical: 10,
   },
+  orderNum: {
+    fontSize: normalize(14),
+    fontWeight: 'bold',
+    color: theme.colors.red,
+    width: '70%',
+  },
   boldStyle: {
     fontSize: normalize(14),
     fontWeight: 'bold',
@@ -93,6 +100,7 @@ const styles = StyleSheet.create({
 
 function PastOrder({navigation}) {
   const [orderData, setOrderData] = React.useState([]);
+  const [refreshing, setRefreshing] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const {signOut} = React.useContext(AuthContext);
 
@@ -102,6 +110,20 @@ function PastOrder({navigation}) {
       return dataTenantAdmin.tenantId;
     } else {
       return null;
+    }
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    getPastOrder();
+    setRefreshing(false);
+  };
+
+  const renderStatus = (status) => {
+    if (status === 'PICKED_UP') {
+      return 'PICKED UP';
+    } else if (status === 'FINISHED') {
+      return 'FINISHED';
     }
   };
 
@@ -127,6 +149,21 @@ function PastOrder({navigation}) {
     return resPrice;
   };
 
+  const renderDate = (dateTime) => {
+    let i = 0;
+    let dates = '';
+    let spaces = 0;
+    for (; i < dateTime.length; i++) {
+      dates += dateTime[i];
+      if (dateTime[i] === ' ') {
+        spaces++;
+        if (spaces === 2) {
+          return dates;
+        }
+      }
+    }
+  };
+
   const renderItem = ({item, idx}) => {
     return (
       <TouchableOpacity
@@ -142,11 +179,10 @@ function PastOrder({navigation}) {
           })
         }>
         <View style={styles.titleWrapper}>
-          <Text style={styles.boldStyle}>Order No. {item.orderNum}</Text>
-          <Text style={styles.boldStyle}>
-            {(item.status === 'PICKED_UP' || item.status === 'FINISHED') &&
-              'FINISHED'}
+          <Text style={styles.orderNum} numberOfLines={1}>
+            Order No. {item.orderNum} ( {renderDate(item.date)})
           </Text>
+          <Text style={styles.boldStyle}>{renderStatus(item.status)}</Text>
         </View>
         {item.detail.map((itm, key) => {
           return (
@@ -214,7 +250,14 @@ function PastOrder({navigation}) {
     <SafeAreaView style={styles.container}>
       <View style={styles.innerContainer}>
         <Title text="Past Order" txtStyle={styles.titleText} />
-        <ScrollView style={styles.contentContainer}>
+        <ScrollView
+          style={styles.contentContainer}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => onRefresh()}
+            />
+          }>
           {isLoading ? (
             <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
           ) : (

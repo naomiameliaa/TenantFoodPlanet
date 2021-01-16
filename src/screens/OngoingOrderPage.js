@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Dimensions,
+  RefreshControl,
 } from 'react-native';
 import axios from 'axios';
 import ButtonText from '../components/ButtonText';
@@ -60,26 +61,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginVertical: 10,
   },
-  orderNum: {
+  orderText: {
     fontSize: normalize(14),
     fontWeight: 'bold',
     color: theme.colors.red,
   },
-  orderNumBtnWrapper: {
+  orderNumTimeWrapper: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-  },
-  notifyBtn: {
-    backgroundColor: theme.colors.red,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    marginBottom: 5,
   },
   btnText: {
     color: theme.colors.white,
     fontSize: normalize(12),
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   detailWrapper: {
     marginBottom: 10,
@@ -101,18 +98,28 @@ const styles = StyleSheet.create({
   notes: {
     flex: 1,
   },
+  buttonWrapperHorizontal: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 10,
+  },
+  notifyBtn: {
+    width: '40%',
+    backgroundColor: theme.colors.red,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
   pickedUpBtn: {
     width: '40%',
     backgroundColor: theme.colors.red,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    alignSelf: 'center',
-    marginVertical: 10,
   },
 });
 
 function OngoingOrder({navigation}) {
   const [orderData, setOrderData] = React.useState([]);
+  const [refreshing, setRefreshing] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const {signOut} = React.useContext(AuthContext);
 
@@ -123,6 +130,26 @@ function OngoingOrder({navigation}) {
     } else {
       return null;
     }
+  };
+
+  const renderTime = (dateTime) => {
+    let i = 0;
+    let times = '';
+    let spaces = 0;
+    for (; i < dateTime.length; i++) {
+      if (dateTime[i] === ' ') {
+        spaces++;
+      } else if (spaces === 3) {
+        times += dateTime[i];
+      }
+    }
+    return times;
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    getOngoingOrder();
+    setRefreshing(false);
   };
 
   const renderItem = ({item, idx}) => {
@@ -139,14 +166,9 @@ function OngoingOrder({navigation}) {
             dataOrder: item.detail,
           })
         }>
-        <View style={styles.orderNumBtnWrapper}>
-          <Text style={styles.orderNum}>Order No. {item.orderNum}</Text>
-          <ButtonText
-            title="Notify Customer"
-            wrapperStyle={styles.notifyBtn}
-            txtStyle={styles.btnText}
-            onPress={() => setStatusReady(item.orderId)}
-          />
+        <View style={styles.orderNumTimeWrapper}>
+          <Text style={styles.orderText}>Order No. {item.orderNum}</Text>
+          <Text style={styles.orderText}>{renderTime(item.date)}</Text>
         </View>
         {item.detail.map((itm, key) => {
           return (
@@ -164,12 +186,20 @@ function OngoingOrder({navigation}) {
             </View>
           );
         })}
-        <ButtonText
-          title="Picked up"
-          wrapperStyle={styles.pickedUpBtn}
-          txtStyle={styles.btnText}
-          onPress={() => doPickedUp(item.orderId)}
-        />
+        <View style={styles.buttonWrapperHorizontal}>
+          <ButtonText
+            title="Notify Customer"
+            wrapperStyle={styles.notifyBtn}
+            txtStyle={styles.btnText}
+            onPress={() => setStatusReady(item.orderId)}
+          />
+          <ButtonText
+            title="Picked up"
+            wrapperStyle={styles.pickedUpBtn}
+            txtStyle={styles.btnText}
+            onPress={() => doPickedUp(item.orderId)}
+          />
+        </View>
       </TouchableOpacity>
     );
   };
@@ -286,7 +316,14 @@ function OngoingOrder({navigation}) {
     <SafeAreaView style={styles.container}>
       <View style={styles.innerContainer}>
         <Title text="Ongoing Order" txtStyle={styles.titleText} />
-        <ScrollView style={styles.contentContainer}>
+        <ScrollView
+          style={styles.contentContainer}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => onRefresh()}
+            />
+          }>
           {isLoading ? (
             <SpinnerKit sizeSpinner="large" style={styles.spinnerKitStyle} />
           ) : (

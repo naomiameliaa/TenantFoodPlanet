@@ -105,21 +105,6 @@ function OrderDetail({route}) {
     return resPrice;
   };
 
-  const renderDate = (dateTime) => {
-    let i = 0;
-    let dates = '';
-    let spaces = 0;
-    for (; i < dateTime.length; i++) {
-      dates += dateTime[i];
-      if (dateTime[i] === ' ') {
-        spaces++;
-        if (spaces === 3) {
-          return dates;
-        }
-      }
-    }
-  };
-
   const renderItem = ({item, index}) => {
     return (
       <View key={index}>
@@ -142,7 +127,7 @@ function OrderDetail({route}) {
         <View>
           <Text style={styles.txtStyle}>Order Number : {orderNum}</Text>
           <Text style={styles.txtStyle}>
-            Transaction Date : {renderDate(transactionDate)}
+            Transaction Date : {transactionDate}
           </Text>
           <Text style={styles.txtStyle}>Status : {renderStatus(status)}</Text>
         </View>
