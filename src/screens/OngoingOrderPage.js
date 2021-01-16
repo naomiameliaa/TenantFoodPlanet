@@ -115,6 +115,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
   },
+  pickedUpBtnDisabled: {
+    width: '40%',
+    backgroundColor: theme.colors.red_20,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
 });
 
 function OngoingOrder({navigation}) {
@@ -195,9 +201,14 @@ function OngoingOrder({navigation}) {
           />
           <ButtonText
             title="Picked up"
-            wrapperStyle={styles.pickedUpBtn}
+            wrapperStyle={
+              item.status === 'PROCESSING'
+                ? styles.pickedUpBtnDisabled
+                : styles.pickedUpBtn
+            }
             txtStyle={styles.btnText}
-            onPress={() => doPickedUp(item.orderId)}
+            onPress={() => setStatusPickedUp(item.orderId)}
+            disabled={item.status === 'PROCESSING' ? true : false}
           />
         </View>
       </TouchableOpacity>
@@ -250,11 +261,12 @@ function OngoingOrder({navigation}) {
       const response = await axios.post(
         `https://food-planet.herokuapp.com/orders/setFoodReady?orderId=${orderId}&tenantId=${tenantId}`,
       );
-      if (response.data.msg === 'Query success') {
+      if (response.data.msg === 'Success Send Notification') {
         alertMessage({
           titleMessage: 'Success',
           bodyMessage: 'Success Notify Customer',
           btnText: 'OK',
+          onPressOK: () => getOngoingOrder(),
           btnCancel: true,
         });
       }
@@ -273,22 +285,18 @@ function OngoingOrder({navigation}) {
     }
   }
 
-  const doPickedUp = (orderId) => {
-    setStatusPickedUp(orderId);
-    getOngoingOrder();
-  };
-
   async function setStatusPickedUp(orderId) {
     const tenantId = await getDataTenantAdmin();
     try {
       const response = await axios.post(
         `https://food-planet.herokuapp.com/orders/setOrderPickedUp?orderId=${orderId}&tenantId=${tenantId}`,
       );
-      if (response.data.msg === 'Query success') {
+      if (response.data.msg === 'Success') {
         alertMessage({
           titleMessage: 'Success',
           bodyMessage: 'Order Finished',
           btnText: 'OK',
+          onPressOK: () => getOngoingOrder(),
           btnCancel: true,
         });
       }

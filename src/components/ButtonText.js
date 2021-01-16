@@ -21,11 +21,13 @@ function ButtonText({
   wrapperStyle,
   isLoading,
   colorSpinner,
+  disabled,
 }) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={[styles.btnWrapper, wrapperStyle]}>
+      style={[styles.btnWrapper, wrapperStyle]}
+      disabled={disabled ? disabled : false}>
       {isLoading ? (
         <SpinnerKit
           colorSpinner={colorSpinner ? colorSpinner : theme.colors.white}
