@@ -119,10 +119,11 @@ function LandingPage({navigation}) {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        'https://food-planet.herokuapp.com/users/login?role=tenant',
+        'https://food-planet.herokuapp.com/users/login',
         {
-          auth: {
-            username: email.toLowerCase(),
+          params: {
+            role: 'tenantadmin',
+            email: email.toLowerCase(),
             password: password,
           },
         },
