@@ -119,7 +119,33 @@ function ChangePassword({navigation}) {
     }
   }
 
-  const logout = async () => {
+  async function logout() {
+    setisLoadingLogout(true);
+    try {
+      const response = await axios.post(
+        'https://food-planet.herokuapp.com/users/logout',
+      );
+      if (response.data.object === 'Logout success') {
+        alertMessage({
+          titleMessage: 'Success',
+          bodyMessage: 'Logout success!',
+          btnText: 'OK',
+          onPressOK: () => signOutTenant(),
+          btnCancel: false,
+        });
+      }
+    } catch (error) {
+      alertMessage({
+        titleMessage: 'Error',
+        bodyMessage: 'Please try again later',
+        btnText: 'Try Again',
+        btnCancel: false,
+      });
+    }
+    setisLoadingLogout(false);
+  }
+
+  const signOutTenant = async () => {
     const dataUser = await getData('tenantAdminData');
     if (dataUser !== null) {
       await removeData('tenantAdminData');
@@ -133,7 +159,7 @@ function ChangePassword({navigation}) {
       bodyMessage: 'Please re-login',
       btnText: 'OK',
       onPressOK: () => {
-        logout();
+        signOutTenant();
       },
       btnCancel: false,
     });
