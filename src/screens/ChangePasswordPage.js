@@ -120,7 +120,7 @@ function ChangePassword({navigation}) {
   }
 
   async function logout() {
-    setisLoadingLogout(true);
+    setIsLoading(true);
     try {
       const response = await axios.post(
         'https://food-planet.herokuapp.com/users/logout',
@@ -142,7 +142,7 @@ function ChangePassword({navigation}) {
         btnCancel: false,
       });
     }
-    setisLoadingLogout(false);
+    setIsLoading(false);
   }
 
   const signOutTenant = async () => {
