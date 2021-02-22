@@ -77,10 +77,10 @@ export const alertMessage = ({
 
 export const saveFcmToken = async () => {
   const fcmToken = await messaging().getToken();
-  const dataUser = await getData('tenantAdminData');
+  const dataTenant = await getData('tenantAdminData');
 
-  if (fcmToken && dataUser) {
-    const userId = dataUser.userId;
+  if (fcmToken && dataTenant) {
+    const userId = dataTenant.userId;
     try {
       // eslint-disable-next-line no-unused-vars
       const response = await axios.post(
@@ -96,8 +96,10 @@ export const saveFcmToken = async () => {
 
 export const deleteFcmToken = async () => {
   const fcmToken = await messaging().getToken();
-  if (fcmToken) {
-    const userId = await getUserId();
+  const dataTenant = await getData('tenantAdminData');
+
+  if (fcmToken && dataTenant) {
+    const userId = await dataTenant.userId;
     try {
       const response = await axios.post(
         `https://food-planet.herokuapp.com/users/removeNotificationToken?userId=${userId}&token=${fcmToken}`,

@@ -159,8 +159,8 @@ function AddMenu({navigation, route}) {
 
   const logout = async () => {
     await deleteFcmToken();
-    const dataUser = await getData('tenantAdminData');
-    if (dataUser !== null) {
+    const dataTenant = await getData('tenantAdminData');
+    if (dataTenant !== null) {
       await removeData('tenantAdminData');
       await signOut();
     }
