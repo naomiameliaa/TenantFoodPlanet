@@ -15,7 +15,7 @@ import axios from 'axios';
 import Title from '../components/Title';
 import theme from '../theme';
 import SpinnerKit from '../components/SpinnerKit';
-import {getData, normalize, alertMessage, removeData} from '../utils';
+import {getData, normalize, alertMessage, removeData, deleteFcmToken} from '../utils';
 import {AuthContext} from '../../context';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -202,6 +202,7 @@ function PastOrder({navigation}) {
   };
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('tenantAdminData');
     if (dataUser !== null) {
       await removeData('tenantAdminData');

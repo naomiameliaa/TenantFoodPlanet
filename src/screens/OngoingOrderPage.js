@@ -16,7 +16,7 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import SpinnerKit from '../components/SpinnerKit';
-import {getData, normalize, alertMessage, removeData} from '../utils';
+import {getData, normalize, alertMessage, removeData, deleteFcmToken} from '../utils';
 import {AuthContext} from '../../context';
 
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
@@ -216,6 +216,7 @@ function OngoingOrder({navigation}) {
   };
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('tenantAdminData');
     if (dataUser !== null) {
       await removeData('tenantAdminData');
@@ -246,7 +247,6 @@ function OngoingOrder({navigation}) {
         setOrderData(response.data.object);
       }
     } catch (error) {
-      sessionTimedOut();
       console.log(error);
       if (error.response.status === 401) {
         sessionTimedOut();

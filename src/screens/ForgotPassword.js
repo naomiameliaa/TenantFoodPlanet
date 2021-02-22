@@ -13,7 +13,6 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import {alertMessage, getData, removeData, normalize} from '../utils';
-import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
@@ -98,7 +97,6 @@ const styles = StyleSheet.create({
 function ForgotPassword({navigation}) {
   const [email, onChangeEmail] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
-  const {signOut} = React.useContext(AuthContext);
 
   function checkInput() {
     if (email.length === 0) {
@@ -125,26 +123,6 @@ function ForgotPassword({navigation}) {
     return regExp.test(email);
   }
 
-  const logout = async () => {
-    const dataUser = await getData('tenantAdminData');
-    if (dataUser !== null) {
-      await removeData('tenantAdminData');
-      await signOut();
-    }
-  };
-
-  function sessionTimedOut() {
-    alertMessage({
-      titleMessage: 'Session Timeout',
-      bodyMessage: 'Please re-login',
-      btnText: 'OK',
-      onPressOK: () => {
-        logout();
-      },
-      btnCancel: false,
-    });
-  }
-
   async function sendEmail() {
     setIsLoading(true);
     try {
@@ -161,17 +139,13 @@ function ForgotPassword({navigation}) {
         });
       }
     } catch (error) {
-      if (error.response.status === 401) {
-        sessionTimedOut();
-      } else {
-        console.log(error);
-        alertMessage({
-          titleMessage: 'Failed',
-          bodyMessage: 'Please try again later',
-          btnText: 'Try Again',
-          btnCancel: true,
-        });
-      }
+      console.log(error);
+      alertMessage({
+        titleMessage: 'Failed',
+        bodyMessage: 'Please try again later',
+        btnText: 'Try Again',
+        btnCancel: true,
+      });
     }
     setIsLoading(false);
   }

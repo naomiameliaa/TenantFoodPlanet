@@ -11,7 +11,7 @@ import axios from 'axios';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage, removeData} from '../utils';
+import {normalize, getData, alertMessage, removeData, deleteFcmToken} from '../utils';
 import {AuthContext} from '../../context';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
@@ -138,6 +138,7 @@ function ChangePassword({navigation}) {
   }
 
   const signOutTenant = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('tenantAdminData');
     if (dataUser !== null) {
       await removeData('tenantAdminData');

@@ -12,7 +12,7 @@ import ButtonKit from '../components/ButtonKit';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {normalize, getData, alertMessage, removeData} from '../utils';
+import {normalize, getData, alertMessage, removeData, deleteFcmToken} from '../utils';
 import ImagePicker from 'react-native-image-picker';
 import {AuthContext} from '../../context';
 
@@ -158,6 +158,7 @@ function AddMenu({navigation, route}) {
   }
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('tenantAdminData');
     if (dataUser !== null) {
       await removeData('tenantAdminData');

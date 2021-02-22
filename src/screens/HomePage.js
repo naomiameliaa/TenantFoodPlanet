@@ -4,7 +4,7 @@ import axios from 'axios';
 import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
-import {getData, normalize, alertMessage, removeData} from '../utils';
+import {getData, normalize, alertMessage, removeData, deleteFcmToken} from '../utils';
 import {AuthContext} from '../../context';
 
 const styles = StyleSheet.create({
@@ -70,6 +70,7 @@ function HomePage({navigation}) {
   };
 
   const signOutTenant = async () => {
+    await deleteFcmToken();
     const removeLocalData = await removeData('tenantAdminData');
     if (removeLocalData) {
       signOut();

@@ -14,7 +14,7 @@ import ButtonText from '../components/ButtonText';
 import Title from '../components/Title';
 import theme from '../theme';
 import SpinnerKit from '../components/SpinnerKit';
-import {getData, normalize, alertMessage, removeData} from '../utils';
+import {getData, normalize, alertMessage, removeData, deleteFcmToken} from '../utils';
 import {AuthContext} from '../../context';
 
 const styles = StyleSheet.create({
@@ -104,6 +104,7 @@ function ManageMenu({navigation}) {
   };
 
   const logout = async () => {
+    await deleteFcmToken();
     const dataUser = await getData('tenantAdminData');
     if (dataUser !== null) {
       await removeData('tenantAdminData');
